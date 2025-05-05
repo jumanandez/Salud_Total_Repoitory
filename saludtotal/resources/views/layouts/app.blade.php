@@ -10,6 +10,8 @@
     <link rel="stylesheet" href={{asset("css/styles.css")}}>
     <link rel="stylesheet" href={{asset("css/all.css")}}>
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i,700,700i" rel="stylesheet">
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
+
     <title>{{$title ?? "Salud Total" }}</title>
 </head>
 
@@ -21,27 +23,15 @@
         <!--Header Section Starts Here-->
         <header class="bg-nav">
             <div class="flex justify-between">
+
                 <div class="p-1 mx-3 inline-flex items-center">
-                    <i class="fas fa-bars pr-2 text-white text-3xl cursor-pointer" onclick="sidebarToggle()"></i>
-                    <h1 class="text-white p-2">
-                        <i class="fas fa-plus" style="color: #ec0909;"></i>
-                        Salud Total
-                    </h1>
+                    <i class="fa-solid fa-bars pr-2 text-white text-3xl cursor-pointer" onclick="sidebarToggle()"></i>
                 </div>
-                <div class="p-1 flex flex-row items-center">
-                    <a href="https://github.com/tailwindadmin/admin" class="text-white p-2 mr-2 no-underline hidden md:block lg:block">Github</a>
 
-
-                    <img onclick="profileToggle()" class="inline-block h-8 w-8 rounded-full" src="https://avatars0.githubusercontent.com/u/4323180?s=460&v=4" alt="">
-                    <a href="#" onclick="profileToggle()" class="text-white p-2 no-underline hidden md:block lg:block">Adam Wathan</a>
-                    <div id="ProfileDropDown" class="rounded hidden shadow-md bg-white absolute pin-t mt-12 mr-1 pin-r">
-                        <ul class="list-reset">
-                          <li><a href="#" class="no-underline px-4 py-2 block text-black hover:bg-grey-light">My account</a></li>
-                          <li><a href="#" class="no-underline px-4 py-2 block text-black hover:bg-grey-light">Notifications</a></li>
-                          <li><hr class="border-t mx-2 border-grey-ligght"></li>
-                          <li><a href="#" class="no-underline px-4 py-2 block text-black hover:bg-grey-light">Logout</a></li>
-                        </ul>
-                    </div>
+                <div class="p-1 inline-flex items-center">
+                    <a href="#">
+                        <img src="{{asset('img/salud_total.svg')}}" alt="salud total logo" class="w-32 h-10">
+                    </a>
                 </div>
             </div>
         </header>
@@ -53,20 +43,20 @@
 
                 <ul class="list-reset flex flex-col">
                     <!-- Menu Item  -->
-                    <a id="home" href="index.html"
-                    class="font-sans font-hairline hover:font-normal text-sm text-nav-item no-underline">
-                        <li class=" w-full h-full py-3 px-2 border-b border-light-border">
-                            <div class="w-full">
-                                <i class="fas fa-home float-top mx-2"></i>
+                    <a id="home" href="{{route('welcome')}}"
+                    class="font-sans font-hairline hover:font-normal text-sm text-nav-item no-underline border-b border-light-border">
+                        <li class="w-full h-full py-3 px-2 ">
+                            <div class="w-full justify-center">
+                                <i class="fas fa-home float-top mx-2 text-xl"></i>
                             </div>
                         </li>
                     </a>
                     <!-- End Menu Item  -->
                     <a href="index.html"
-                    class="font-sans font-hairline hover:font-normal text-sm text-nav-item no-underline">
-                        <li class=" w-full h-full py-3 px-2 border-b border-light-border">
-                            <div class="w-full">
-                                <i class="fas fa-calendar-alt float-top mx-2"></i>
+                    class="font-sans font-hairline hover:font-normal text-sm text-nav-item no-underline border-b border-light-border">
+                        <li class="w-full h-full py-3 px-2 ">
+                            <div class="w-full justify-center">
+                                <i class="fas fa-calendar-alt float-top mx-2 text-2xl"></i>
                             </div>
                         </li>
                     </a>
