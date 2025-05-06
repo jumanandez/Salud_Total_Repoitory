@@ -17,6 +17,7 @@ class User extends Authenticatable
      *
      * @var list<string>
      */
+    //Ajustamos para que trabaje con la tabla pacientes
     protected $table = 'pacientes';
     protected $fillable = [
         'nombre_apellido',
