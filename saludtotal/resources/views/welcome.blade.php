@@ -29,9 +29,16 @@
                 </div>
 
                 <div class="p-2 flex flex-row items-center">
-                    <a href="#" class="text-white bg-green-dark p-2 rounded-full">
-                        <span class="px-5">Pedir Turno</span>
-                    </a>
+                    @guest
+                        <a href="{{route('login')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
+                            <span class="px-5">Pedir Turno</span>
+                        </a>
+                    @endguest
+                    @auth
+                        <a href="{{route('profesionales.index')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
+                            <span class="px-5">Pedir Turno</span>
+                        </a>
+                    @endauth
                 </div>
             </div>
         </header>
@@ -83,7 +90,7 @@
                             </a>
                         </div>
                         <div class="p-6">
-                            <a href="">
+                            <a href="{{route('profesionales.index')}}">
                                 <span class="text-2xl">Médicos <i class="fa-solid fa-angle-down align-bottom"> </i></span>
                             </a>
                         </div>
