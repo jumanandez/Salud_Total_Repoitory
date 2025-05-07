@@ -11972,6 +11972,7 @@ th {
 
 html{
   line-height: normal;
+  overflow-y: scroll;
 }
 
 h1{
