@@ -30,14 +30,23 @@ class RegisteredUserController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $request->validate([
-            'name' => ['required', 'string', 'max:255'],
+            'nombre_apellido' => ['required', 'string', 'max:255'],
+            'dni' => ['required', 'string', 'max:255', 'unique:'.User::class,'regex:/^\d+$/', 'digits_between:8,9'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', 'unique:'.User::class],
+            'telefono' => ['required', 'string', 'max:255'],
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
+        ],
+        [
+            'dni.regex' => 'El DNI solo puede contener números.',
+            'dni.digits_between' => 'El DNI no es válido.',
         ]);
 
+
         $user = User::create([
-            'name' => $request->name,
+            'nombre_apellido' => $request->nombre_apellido,
+            'dni' => $request->dni,
             'email' => $request->email,
+            'telefono' => $request->telefono,
             'password' => Hash::make($request->password),
         ]);
 
@@ -45,6 +54,6 @@ class RegisteredUserController extends Controller
 
         Auth::login($user);
 
-        return redirect(route('dashboard', absolute: false));
+        return redirect(route('welcome', absolute: false));
     }
 }
