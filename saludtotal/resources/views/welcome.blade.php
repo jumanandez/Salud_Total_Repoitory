@@ -21,7 +21,7 @@
     <!--Screen-->
     <div class="min-h-screen flex flex-col">
         <!--Header Section Starts Here-->
-        <header class="bg-nav">
+        <header class="bg-nav relative z-20">
             <div class="flex justify-between">
 
                 <div class="p-1 mx-3 inline-flex items-center">
@@ -96,7 +96,7 @@
                 </div>
                 <!--/Shortcuts-->
                 <!--Content-->
-
+                 <img src="{{asset('img/WelcomeFondo1.png')}}" alt="salud total logo" class="w-full h-1/2">
                 <!--/Content-->
 
             </main>
