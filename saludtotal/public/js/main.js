@@ -45,9 +45,31 @@ if (document.querySelector('.modal-wrapper'))
     document.querySelectorAll('.modal-trigger').forEach(btn => {
         toggleModal('add', btn);
     });
-    
+
     // close the modal
     document.querySelectorAll('.close-modal').forEach(btn => {
         toggleModal('remove', btn);
     });
+}
+
+//Seleccion de Doctores
+function toggleSection(button) {
+    let section = button.nextElementSibling;
+    let icon = button.querySelector('.toggle-icon');
+    if (section.classList.contains('hidden')) {
+        section.classList.remove('hidden');
+        icon.textContent = '-';
+    } else {
+        section.classList.add('hidden');
+        icon.textContent = '+';
+    }
+}
+
+function selectDoctor(element) {
+    let box_doctor = document.getElementById('selected-doctor');
+
+    if (box_doctor.querySelector('p').textContent !== element.textContent) {
+        box_doctor.innerHTML = `<img src='https://via.placeholder.com/100' class='mx-auto rounded-full mb-2'>
+        <p class='font-semibold'>${element.textContent}</p>`;
+    }
 }
