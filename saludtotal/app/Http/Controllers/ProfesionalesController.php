@@ -18,5 +18,19 @@ class ProfesionalesController extends Controller
         return response()->json($especialidades);
     }
 
+    public function doctores($especialidadId)
+    {
+
+        $doctores = Doctor::query()->where('especialidad', $especialidadId)->get();
+
+
+        return response()->json($doctores);
+    }
+
+    public function show()
+    {
+        $doctor = Doctor::all();
+        return response()->json($doctor);
+    }
 
 }
