@@ -12,6 +12,7 @@
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i,700,700i" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
+    @viteReactRefresh
     <title>{{$title ?? "Salud Total" }}</title>
 </head>
 
@@ -65,7 +66,7 @@
             </aside>
             <!--/Sidebar-->
             <!--Main-->
-            <main class="bg-white-300 flex-1 p-3 overflow-hidden">
+            <main class="bg-white-300 flex-1 px-32 py-6 overflow-hidden">
                 {{$slot}}
             </main>
 
