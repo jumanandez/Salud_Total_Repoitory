@@ -103,7 +103,42 @@
                 </div>
                 <!--/Shortcuts-->
                 <!--Content-->
-                 <img src="{{asset('img/WelcomeFondo1.png')}}" alt="salud total logo" class="w-full h-1/2">
+                 <!--img src="{asset('img/WelcomeFondo1.png')}}" alt="salud total logo" class="w-full h-1/2"-->
+                 <section class="relative z-0 bg-cover bg-center py-20" style="background-image: url('{{ asset('img/WelcomeFondo1.jpg') }}')" >
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+    <h1 class="text-4xl font-bold text-black text-center mb-12 drop-shadow-lg">
+      Bienvenido a Salud Total
+    </h1>
+
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
+      <!-- Panel 1 -->
+     <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+          <img
+    class="w-full h-48 object-cover object-center"
+    src="{{ asset('img/panel1.jpg') }}"
+    alt="Panel 1"
+  />
+        <div class="p-6">
+          <h3 class="text-xl font-semibold mb-2">Chequeos Médicos</h3>
+          <p class="text-gray-800">Realizarse un análisis de  sangre de forma  regular es  fundamental  para cuidar la salud. Este examen permite detectar de manera temprana posibles enfermedades, como la diabetes, el colesterol alto, problemas hepáticos, anemia o infecciones. Además, ayuda a monitorear el estado general del cuerpo y la efectividad de ciertos tratamientos si ya se está bajo cuidado médico.</p>
+        </div>
+      </div>
+
+      <!-- Panel 2 -->
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+                  <img
+    class="w-full h-48 object-cover object-center"
+    src="{{ asset('img/panel2.png') }}"
+    alt="Panel 1"
+  />
+        <div class="p-6">
+          <h3 class="text-xl font-semibold mb-2">La importancia de tomarse la presion</h3>
+          <p class="text-gray-700">Tomarse la presión  arterial con un doctor permite evaluar el funcionamiento del corazón y el sistema circulatorio. Es un control simple, rápido y sin dolor, pero muy útil para detectar problemas como la hipertensión, una condición que muchas veces no presenta síntomas pero que puede causar serios daños si no se trata a tiempo.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
                 <!--/Content-->
 
             </main>
