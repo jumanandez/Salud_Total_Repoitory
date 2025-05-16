@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use App\Models\Doctor;
 use App\Models\Especialidad;
+use App\Models\HorarioDisponible;
 class ProfesionalesController extends Controller
 {
     public function index()
@@ -31,6 +32,12 @@ class ProfesionalesController extends Controller
     {
         $doctor = Doctor::all();
         return response()->json($doctor);
+    }
+
+    public function horarios($doctorId)
+    {
+        $horarios = HorarioDisponible::query()->where('doctor_id', $doctorId)->where('activo', '1')->get();
+        return response()->json($horarios);
     }
 
 }

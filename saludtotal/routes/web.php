@@ -18,6 +18,7 @@ Route::get('profesionales/especialidades', [ProfesionalesController::class, 'esp
 Route::get('profesionales/especialidades/{especialidad_id}/doctores', [ProfesionalesController::class, 'doctores'])->name('especialidad.doctores');
 
 Route::get('profesionales/doctores', [ProfesionalesController::class, 'show'])->name('profesionales.doctores');
+Route::get('profesionales/{doctor_id}/horarios', [ProfesionalesController::class, 'horarios'])->name('profesionales.horarios');
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
