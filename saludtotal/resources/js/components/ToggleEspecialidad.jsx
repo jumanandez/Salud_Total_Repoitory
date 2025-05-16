@@ -21,7 +21,7 @@ export default function ToggleEspecialidad () {
             setEspecialidades(data);
         }
         fetchData();
-    });
+    }, []);
     return (
         <>
             {

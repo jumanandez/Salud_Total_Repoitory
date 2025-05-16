@@ -1,8 +1,7 @@
-import React, { use } from "react";
+import React from "react";
 import {useEffect, useState } from "react";
-import { SelectDoctor } from "./SelectDoctor";
 import { cargarDoctores } from "../services/cargarDoctores.js";
-
+import SelectDoctor from "./SelectDoctor.jsx";
 
 
 export function ButtonDisplayDoctores({isOpen ,especialidadId, nombre, handleToggle}) {
@@ -12,11 +11,10 @@ export function ButtonDisplayDoctores({isOpen ,especialidadId, nombre, handleTog
     useEffect(() => {
         async function fetchData() {
             const data = await cargarDoctores(especialidadId);
-            console.log(data);
-
             setDoctores(data);
         }
         fetchData();
+
     }, []);
 
     return (
@@ -26,18 +24,11 @@ export function ButtonDisplayDoctores({isOpen ,especialidadId, nombre, handleTog
             <span className="toggle-icon text-blue-800 text-4xl flex items-center"><i className={isOpen ? "fa-solid fa-minus" : "fa-regular fa-plus"}></i></span>
         </button>
 
-        {isOpen && (
-            <div>
-        {
-            doctores.map((doctor) => (
-                <div key={doctor.doctor_id} className="bg-gray-100 p-2 space-y-1">
-                    <div className="cursor-pointer px-3 py-1 bg-blue-100 rounded hover:bg-blue-200">
-                        {doctor.nombre_apellido}
-                    </div>
-                </div>
-            ))}
-        </div>
-        )}
+        {isOpen && doctores.map((doctor) => (
+            <SelectDoctor key={doctor.doctor_id} doctor_id={doctor.doctor_id} nombre_apellido={doctor.nombre_apellido }/>
+        ))}
+
+
         </>
     )
 }
