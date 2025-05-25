@@ -165,6 +165,53 @@
 
   </div>
 </section>
+<section class="relative z-0 bg-cover bg-center py-20" style="background-image: url('{{ asset('img/WelcomeFondo2.jpg') }}')" >
+    <h1 class="text-4xl font-bold text-black text-center mb-12 drop-shadow-lg">
+        NUESTROS SERVICIOS CLINICOS
+    </h1>
+<div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 px-8 max-w-6xl mx-auto">
+
+  <div class="rounded-xl overflow-hidden shadow-md mb-6">
+  <img src="img/Cardiologia.jpg" alt="Cardiologia" class="w-full h-48 object-cover" />
+  <div class="p-4 bg-white">
+    <h3 class="text-lg font-bold">Cardiología</h3>
+      <p class="text-sm text-gray-700">
+        Ofrecemos un diagnóstico y tratamiento integral de las enfermedades cardiovasculares, asegurando una atención continua y de calidad.
+      </p>
+    </div>
+  </div>
+  <div class="rounded-xl overflow-hidden shadow-md mb-6">
+  <img src="img/Pediatria.jpg" alt="Pediatria" class="w-full h-48 object-cover" />
+  <div class="p-4 bg-white">
+    <h3 class="text-lg font-bold">Pediatria</h3>
+      <p class="text-sm text-gray-700">
+        Cuidamos el crecimiento y desarrollo saludable de los más pequeños, especializada desde la infancia hasta la adolescencia.
+      </p>
+    </div>
+  </div>
+
+  <div class="rounded-xl overflow-hidden shadow-md mb-6">
+  <img src="img/Ginecologia.jpg" alt="Ginecologia" class="w-full h-48 object-cover" />
+  <div class="p-4 bg-white">
+    <h3 class="text-lg font-bold">Ginecología</h3>
+      <p class="text-sm text-gray-700">
+        Brindamos servicios completos de salud femenina, desde chequeos rutinarios hasta tratamientos especializados.
+      </p>
+    </div>
+  </div>
+
+  <div class="rounded-xl overflow-hidden shadow-md mb-6">
+  <img src="img/clinica-general.jpg" alt="Clinica General" class="w-full h-48 object-cover" />
+  <div class="p-4 bg-white">
+    <h3 class="text-lg font-bold">Clinica General</h3>
+      <p class="text-sm text-gray-700">
+        Proporcionamos atención médica general con un enfoque en la prevención y la salud integral.
+      </p>
+    </div>
+  </div>
+</section>
+<section class="relative z-0 bg-cover bg-center py-20" style="background-image: url('{{ asset('img/Consulta.jpg') }}')" >
+  <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 </section>
                 <!--/Content-->
 
