@@ -138,6 +138,33 @@
       </div>
     </div>
   </div>
+<section class="bg-white py-10">
+  <h1 class="text-2xl font-semibold text-center mb-8">Pedí tu turno</h1>
+
+  <div class="flex justify-center items-center flex-wrap gap-x-12 gap-y-8">
+
+    <a href="/turnos/cardiologia" class="flex flex-col items-center hover:opacity-80 transition">
+      <img src="img/doctor.svg" alt="Cardiología" class="w-32 h-32 mb-2 rounded-xl p-3">
+      <span class="text-[#0C1C3C] font-semibold">Cardiología</span>
+    </a>
+
+    <a href="/turnos/ginecologia" class="flex flex-col items-center hover:opacity-80 transition">
+      <img src="img/doctor.svg" alt="Ginecología" class="w-32 h-32 mb-2 rounded-xl p-3">
+      <span class="text-[#0C1C3C] font-semibold">Ginecología</span>
+    </a>
+
+    <a href="/turnos/pediatria" class="flex flex-col items-center hover:opacity-80 transition">
+      <img src="img/doctor.svg" alt="Pediatría" class="w-32 h-32 mb-2 rounded-xl p-3">
+      <span class="text-[#0C1C3C] font-semibold">Pediatría</span>
+    </a>
+
+    <a href="/turnos/clinica-general" class="flex flex-col items-center hover:opacity-80 transition">
+      <img src="img/doctor.svg" alt="Clínica General" class="w-32 h-32 mb-2 rounded-xl p-3">
+      <span class="text-[#0C1C3C] font-semibold">Clínica General</span>
+    </a>
+
+  </div>
+</section>
 </section>
                 <!--/Content-->
 
