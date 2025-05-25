@@ -110,8 +110,6 @@
       Bienvenido a Salud Total
     </h1>
 
-    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-8">
-      <!-- Panel 1 -->
      <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
           <img
     class="w-full h-48 object-cover object-center"
@@ -124,7 +122,6 @@
         </div>
       </div>
 
-      <!-- Panel 2 -->
       <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
                   <img
     class="w-full h-48 object-cover object-center"
@@ -212,6 +209,31 @@
 </section>
 <section class="relative z-0 bg-cover bg-center py-20" style="background-image: url('{{ asset('img/Consulta.jpg') }}')" >
   <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+      <div class="bg-white shadow-lg rounded-lg overflow-hidden mb-8">
+         <h1 class="text-4xl font-bold text-black text-center mb-12 drop-shadow-lg">
+      HACER UNA CONSULTA ESPECIAL
+    </h1>
+        <div class="p-6">
+          <h3 class="text-xl font-semibold mb-2">Nombre</h3>
+          <input type="text" class="border border-gray-300 rounded-lg p-2 w-full mb-4" placeholder="Ingrese su nombre">
+          
+          <h3 class="text-xl font-semibold mb-2">Email</h3>
+          <input type="email" class="border border-gray-300 rounded-lg p-2 w-full mb-4" placeholder="Ingrese su email">
+          
+          <h3 class="text-xl font-semibold mb-2">Teléfono</h3>
+          <input type="text" class="border border-gray-300 rounded-lg p-2 w-full mb-4" placeholder="Ingrese su teléfono">
+          
+          <h3 class="text-xl font-semibold mb-2">Mensaje</h3>
+          <textarea class="border border-gray-300 rounded-lg p-2 w-full mb-4" rows="4" placeholder="Ingrese su mensaje"></textarea>
+          
+          <button class="bg-blue-500 text-white font-semibold py-2 px-4 rounded-lg hover:bg-blue-600">
+            Enviar
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
 </section>
                 <!--/Content-->
 
