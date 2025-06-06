@@ -196,10 +196,25 @@
             </main>
 
         </div>
-        <footer class="bg-grey-darkest text-white p-2">
-            <div class="flex flex-1 mx-auto">&copy; My Design</div>
-            <div class="flex flex-1 mx-auto">Distributed by:  <a href="https://themewagon.com/" target=" _blank">Themewagon</a></div>
-        </footer>
+        <footer style="background-color: #0D1831;" class="text-white py-8">
+    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
+        <!-- Logo y nombre -->
+        <div class="flex items-center gap-4">
+            <img src="{{ asset('img/salud_total.svg') }}" alt="Salud Total Logo" class="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
+        </div>
+        <!-- Direcciones -->
+        <div class="flex flex-col gap-4 p-12">
+            <x-footer-icon icon="img/map-pin.svg" alt="Dirección">Av. Díaz Colodredo 1893</x-footer-icon>
+            <x-footer-icon icon="img/map-pin.svg" alt="Dirección">Av. Díaz Colodredo 1893</x-footer-icon>
+            <x-footer-icon icon="img/map-pin.svg" alt="Dirección">Av. Díaz Colodredo 1893</x-footer-icon>
+        </div>
+        <!-- Contacto -->
+        <div class="flex flex-col gap-4">
+            <x-footer-icon icon="img/mail.svg" alt="Email">SaludTotal1@gmail.com</x-footer-icon>
+            <x-footer-icon icon="img/phone.svg" alt="Teléfono">+54 3777-569034</x-footer-icon>
+        </div>
+    </div>
+</footer>
         <!--/footer-->
 
     </div>
