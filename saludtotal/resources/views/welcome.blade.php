@@ -151,7 +151,7 @@
 <!-- Zona mejorada de HACER UNA CONSULTA ESPECIAL -->
 <section class="relative z-0 bg-cover bg-center py-20" style="background-image: url('{{ asset('img/Consulta.jpg') }}')">
     <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white shadow-2xl rounded-2xl overflow-hidden mb-8 border border-gray-200">
+        <div class="bg-white shadow-2xl rounded-lg overflow-hidden mb-8 border border-gray-200">
             <h1 class="text-4xl font-bold text-[#0C1C3C] text-center mb-8 drop-shadow-lg pt-8">
                 HACER UNA CONSULTA ESPECIAL
             </h1>
