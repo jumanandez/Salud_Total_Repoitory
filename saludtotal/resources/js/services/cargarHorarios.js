@@ -15,6 +15,7 @@ export const cargarHorarios = async (doctor_id) => {
             horariosParaComponente.push({
                 horario_id : horarios.find(h => h.dia_semana - 1 === index).id,
                 doctor_id: horarios.find(h => h.dia_semana - 1 === index).doctor_id,
+                dia_num : index + 1,
                 dia,
                 hora_inicio: horarios.find(h => h.dia_semana - 1 === index).hora_inicio,
                 hora_fin: horarios.find(h => h.dia_semana - 1 === index).hora_fin
@@ -23,6 +24,7 @@ export const cargarHorarios = async (doctor_id) => {
             horariosParaComponente.push({
                 horario_id : null,
                 doctor_id: doctor_id,
+                dia_num : index + 1,
                 dia,
                 hora_inicio: null,
                 hora_fin: null

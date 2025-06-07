@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-export default function Modal ({ isOpen, onClose, title, children, size = "md" }){
+export default function Modal ({ isOpen, onClose, title, children, size = "md", titleColor = '', titleBackground = ''}){
     const modalRef = useRef(null);
 
   // Cierra el modal al hacer clic fuera de él
@@ -28,16 +28,9 @@ export default function Modal ({ isOpen, onClose, title, children, size = "md" }
             ref={modalRef} className={`bg-white rounded-lg shadow-xl z-60 relative w-11/12 ${
             size === 'lg' ? 'max-w-4xl' : 'max-w-lg' }`}>
             <div className="p-5">
-                <div className="border-b p-2 pb-3 pt-0 mb-4">
-                    <div className="flex justify-between items-center">
-                        <div>{title}</div>
-                        <span className="cursor-pointer px-3 py-1 rounded-full bg-grey-lighter hover:bg-grey-light transition-colors"
-                            onClick={onClose}
-                        >
-                            <span className="text-grey-darkest">
-                                <i className="fas fa-times"></i>
-                            </span>
-                        </span>
+                <div className={`border-b rounded-lg p-2 pb-3 pt-0 mb-4 ${titleBackground}`}>
+                    <div className={`flex justify-between items-center ${titleColor}`}>
+                        <h2 className='font-bold'>{title}</h2>
                     </div>
                 </div>
                 {children}

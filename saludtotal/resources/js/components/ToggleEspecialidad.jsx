@@ -27,7 +27,11 @@ export default function ToggleEspecialidad () {
             {
             especialidades.map((especialidad) => (
                 <div key={especialidad.especialidad_id} className="rounded-sm overflow-hidden p-2">
-                    <ButtonDisplayDoctores isOpen={especialidad.especialidad_id === openId} handleToggle={handleToggle}  especialidadId={especialidad.especialidad_id} nombre={especialidad.nombre} />
+                    <ButtonDisplayDoctores
+                    isOpen={especialidad.especialidad_id === openId}
+                    handleToggle={handleToggle}
+                    especialidadId={especialidad.especialidad_id}
+                    nombre={especialidad.nombre} />
                 </div>
             ))
             }

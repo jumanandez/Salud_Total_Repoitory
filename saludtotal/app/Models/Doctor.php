@@ -28,4 +28,5 @@ class Doctor extends Model
     {
         return $this->hasMany(HorarioDisponible::class, 'doctor_id');
     }
+
 }

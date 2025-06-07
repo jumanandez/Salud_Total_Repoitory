@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfesionalesController;
+use App\Http\Controllers\TurnoController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -13,12 +14,17 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::get('/profesionales', [ProfesionalesController::class, 'index'])->name('profesionales.index');
-
 Route::get('profesionales/especialidades', [ProfesionalesController::class, 'especialidades'])->name('profesionales.especialidades');
-Route::get('profesionales/especialidades/{especialidad_id}/doctores', [ProfesionalesController::class, 'doctores'])->name('especialidad.doctores');
-
-Route::get('profesionales/doctores', [ProfesionalesController::class, 'show'])->name('profesionales.doctores');
+Route::get('profesionales/especialidades/{especialidad_id}/doctores', [ProfesionalesController::class, 'doctoresByEspecialidad'])->name('especialidad.doctores');
+Route::get('profesionales/doctores', [ProfesionalesController::class, 'doctores'])->name('profesionales.doctores');
 Route::get('profesionales/{doctor_id}/horarios', [ProfesionalesController::class, 'horarios'])->name('profesionales.horarios');
+Route::get('profesionales/doctor/{doctor_id}', [ProfesionalesController::class, 'nombreDoctorById'])->name('profesional.nombre');
+
+    Route::get('turnos/doctor/disponibles', [TurnoController::class, 'turnosDisponibles'])->name('turnos.disponibles');
+Route::middleware('auth')->group(function () {
+    Route::get('turnos/create', [TurnoController::class, 'create'])->name('turnos.create');
+    Route::post('turnos/store', [TurnoController::class, 'store'])->name('turnos.store');
+});
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');

@@ -11,6 +11,7 @@ class HorarioDisponible extends Model
     protected $casts = [
         'hora_inicio' => 'datetime:H:i',
         'hora_fin' => 'datetime:H:i',
+        'duracion_minutos' => 'integer',
     ];
 
     /**
