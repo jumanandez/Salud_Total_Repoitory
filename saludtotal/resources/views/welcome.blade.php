@@ -35,7 +35,7 @@
                         </a>
                     @endguest
                     @auth
-                        <a href="{{route('profesionales.index')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
+                        <a href="{{route('turnos.create')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
                             <span class="px-5">Pedir Turno</span>
                         </a>
                     @endauth

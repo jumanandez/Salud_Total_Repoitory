@@ -5,13 +5,14 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta http-equiv="X-UA-Compatible" content="ie=edge">
-    <meta name="keywords" content="tailwind,tailwindcss,tailwind css,css,starter template,free template,admin templates, admin template, admin dashboard, free tailwind templates, tailwind example">
+    <meta name="keywords" content="">
+    <meta name="csrf-token" content="{{ csrf_token() }}">
     <!-- Css -->
     <link rel="stylesheet" href={{asset("css/styles.css")}}>
     <link rel="stylesheet" href={{asset("css/all.css")}}>
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i,700,700i" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
-
+    @viteReactRefresh
     <title>{{$title ?? "Salud Total" }}</title>
 </head>
 
@@ -65,7 +66,7 @@
             </aside>
             <!--/Sidebar-->
             <!--Main-->
-            <main class="bg-white-300 flex-1 p-3 overflow-hidden">
+            <main class="bg-white-300 flex-1 px-32 py-6 overflow-hidden">
                 {{$slot}}
             </main>
 
