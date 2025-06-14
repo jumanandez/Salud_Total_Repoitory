@@ -80,12 +80,12 @@
 
                     <div class="flex flex-row gap-10 align-items-center">
                         <div class="p-6">
-                            <a href="">
+                            <a href="#consulta-especial">
                                 <span class="text-2xl">Consultas <i class="fa-solid fa-angle-down align-bottom"></i></span>
                             </a>
                         </div>
                         <div class="p-6">
-                            <a href="">
+                            <a href="#footer">
                                 <span class="text-2xl">Contáctanos <i class="fa-solid fa-angle-down align-bottom"> </i></span>
                             </a>
                         </div>
@@ -95,7 +95,7 @@
                             </a>
                         </div>
                         <div class="p-6">
-                            <a href="">
+                            <a href="#servicios-clinicos">
                                 <span class="text-2xl">Servicios Clínicos <i class="fa-solid fa-angle-down align-bottom"> </i></span>
                             </a>
                         </div>
@@ -103,118 +103,121 @@
                 </div>
                 <!--/Shortcuts-->
                 <!--Content-->
-                 <!--img src="{asset('img/WelcomeFondo1.png')}}" alt="salud total logo" class="w-full h-1/2"-->
-              <section class="relative z-0 bg-cover bg-center py-20" style="background-image: url('{{ asset('img/WelcomeFondo1.jpg') }}')" >
-    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-        <h1 class="text-4xl font-bold text-black text-center mb-12 drop-shadow-lg">
-            Bienvenido a Salud Total
-        </h1>
-        <x-panel-info img="img/panel1.jpg" title="Chequeos Médicos">
-            Realizarse un análisis de sangre de forma regular es fundamental para cuidar la salud. Este examen permite detectar de manera temprana posibles enfermedades, como la diabetes, el colesterol alto, problemas hepáticos, anemia o infecciones. Además, ayuda a monitorear el estado general del cuerpo y la efectividad de ciertos tratamientos si ya se está bajo cuidado médico.
-        </x-panel-info>
-        <x-panel-info img="img/panel2.png" title="La importancia de tomarse la presión">
-            Tomarse la presión arterial con un doctor permite evaluar el funcionamiento del corazón y el sistema circulatorio. Es un control simple, rápido y sin dolor, pero muy útil para detectar problemas como la hipertensión, una condición que muchas veces no presenta síntomas pero que puede causar serios daños si no se trata a tiempo.
-        </x-panel-info>
-    </div>
-</section>
+                <!--img src="{asset('img/WelcomeFondo1.png')}}" alt="salud total logo" class="w-full h-1/2"-->
+                <section class="relative z-0 bg-cover bg-center" style="background-image: url('{{ asset('img/WelcomeFondo1.jpg') }}')" >
+                    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <h1 class="text-4xl font-bold text-black text-center mb-12 drop-shadow-lg">
+                            Bienvenido a Salud Total
+                        </h1>
+                        <div class="flex flex-row space-x-9">
+                            <x-panel-info img="img/panel1.jpg" title="Chequeos Médicos">
+                                Realizarse un análisis de sangre de forma regular es fundamental para cuidar la salud. Este examen permite detectar de manera temprana posibles enfermedades, como la diabetes, el colesterol alto, problemas hepáticos, anemia o infecciones. Además, ayuda a monitorear el estado general del cuerpo y la efectividad de tratamientos.
+                            </x-panel-info>
+                            <x-panel-info img="img/panel2.png" title="La importancia de tomarse la presión">
+                                Tomarse la presión arterial con un doctor permite evaluar el funcionamiento del corazón y el sistema circulatorio. Es un control simple, rápido y sin dolor, pero muy útil para detectar problemas como la hipertensión, una condición que muchas veces no presenta síntomas pero que puede causar serios daños si no se trata a tiempo.
+                            </x-panel-info>
+                        </div>
+                    </div>
+                </section>
 
-<section class="bg-white py-10">
-    <h1 class="text-2xl font-semibold text-center mb-8">Pedí tu turno</h1>
-    <div class="flex justify-center items-center flex-wrap gap-x-12 gap-y-8">
-        <x-turno-link href="/turnos/cardiologia" img="img/doctor.svg" label="Cardiología"/>
-        <x-turno-link href="/turnos/ginecologia" img="img/doctor.svg" label="Ginecología"/>
-        <x-turno-link href="/turnos/pediatria" img="img/doctor.svg" label="Pediatría"/>
-        <x-turno-link href="/turnos/clinica-general" img="img/doctor.svg" label="Clínica General"/>
-    </div>
-</section>
+                <section class="bg-white ">
+                    <h1 class="text-2xl font-semibold text-center mb-4 mt-4">Pedí tu turno</h1>
+                    <div class="flex justify-center items-center flex-row pb-4">
+                        <x-turno-link href="{{ route('turnos.create') }}" img="img/doctor.svg" label="Cardiología"/>
+                        <x-turno-link href="{{ route('turnos.create') }}" img="img/doctor.svg" label="Ginecología"/>
+                        <x-turno-link href="{{ route('turnos.create') }}" img="img/doctor.svg" label="Pediatría"/>
+                        <x-turno-link href="{{ route('turnos.create') }}" img="img/doctor.svg" label="Clínica General"/>
+                    </div>
+                </section>
 
-<section class="relative z-0 bg-cover bg-center py-20" style="background-image: url('{{ asset('img/WelcomeFondo2.jpg') }}')" >
-    <h1 class="text-4xl font-bold text-black text-center mb-12 drop-shadow-lg">
-        NUESTROS SERVICIOS CLINICOS
-    </h1>
-    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-2 gap-8 px-8 max-w-6xl mx-auto">
-        <x-panel-info img="img/Cardiologia.jpg" title="Cardiología">
-            Ofrecemos un diagnóstico y tratamiento integral de las enfermedades cardiovasculares, asegurando una atención continua y de calidad.
-        </x-panel-info>
-        <x-panel-info img="img/Pediatria.jpg" title="Pediatría">
-            Cuidamos el crecimiento y desarrollo saludable de los más pequeños, especializada desde la infancia hasta la adolescencia.
-        </x-panel-info>
-        <x-panel-info img="img/Ginecologia.jpg" title="Ginecología">
-            Brindamos servicios completos de salud femenina, desde chequeos rutinarios hasta tratamientos especializados.
-        </x-panel-info>
-        <x-panel-info img="img/clinica-general.jpg" title="Clínica General">
-            Proporcionamos atención médica general con un enfoque en la prevención y la salud integral.
-        </x-panel-info>
-    </div>
-</section>
+                <section id="servicios-clinicos"
+                    class="relative z-0 bg-cover bg-center py-2"
+                    style="background-image: url('{{ asset('img/WelcomeFondo2.jpg') }}')" >
+                    <h1 class="text-4xl font-bold text-black text-center mb-12 drop-shadow-lg">
+                        NUESTROS SERVICIOS CLINICOS
+                    </h1>
+                    <div class="grid grid-cols-2 gap-8 max-w-6xl mx-auto">
+                        <x-panel-info img="img/Cardiologia.jpg" title="Cardiología">
+                            Ofrecemos un diagnóstico y tratamiento integral de las enfermedades cardiovasculares, asegurando una atención continua y de calidad.
+                        </x-panel-info>
+                        <x-panel-info img="img/Pediatria.jpg" title="Pediatría">
+                            Cuidamos el crecimiento y desarrollo saludable de los más pequeños, especializada desde la infancia hasta la adolescencia.
+                        </x-panel-info>
+                        <x-panel-info img="img/Ginecologia.jpg" title="Ginecología">
+                            Brindamos servicios completos de salud femenina, desde chequeos rutinarios hasta tratamientos especializados.
+                        </x-panel-info>
+                        <x-panel-info img="img/clinica-general.jpg" title="Clínica General">
+                            Proporcionamos atención médica general con un enfoque en la prevención y la salud integral.
+                        </x-panel-info>
+                    </div>
+                </section>
 
-<!-- Zona mejorada de HACER UNA CONSULTA ESPECIAL -->
-<section class="relative z-0 bg-cover bg-center py-20" style="background-image: url('{{ asset('img/Consulta.jpg') }}')">
-    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
-        <div class="bg-white shadow-2xl rounded-lg overflow-hidden mb-8 border border-gray-200">
-            <h1 class="text-4xl font-bold text-[#0C1C3C] text-center mb-8 drop-shadow-lg pt-8">
-                HACER UNA CONSULTA ESPECIAL
-            </h1>
-            <form class="p-8 space-y-6" method="POST" action="#">
-                @csrf
-                <div>
-                    <label for="nombre" class="block text-lg font-semibold mb-1">Nombre</label>
-                    <input type="text" id="nombre" name="nombre" required
-                        class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition" 
-                        placeholder="Ingrese su nombre">
-                </div>
-                <div>
-                    <label for="email" class="block text-lg font-semibold mb-1">Email</label>
-                    <input type="email" id="email" name="email" required
-                        class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition" 
-                        placeholder="Ingrese su email">
-                </div>
-                <div>
-                    <label for="telefono" class="block text-lg font-semibold mb-1">Teléfono</label>
-                    <input type="text" id="telefono" name="telefono"
-                        class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition" 
-                        placeholder="Ingrese su teléfono">
-                </div>
-                <div>
-                    <label for="mensaje" class="block text-lg font-semibold mb-1">Mensaje</label>
-                    <textarea id="mensaje" name="mensaje" rows="4" required
-                        class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition" 
-                        placeholder="Ingrese su mensaje"></textarea>
-                </div>
-                <div class="flex justify-center">
-                    <button type="submit"
-                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition">
-                        Enviar Consulta
-                    </button>
-                </div>
-            </form>
-        </div>
-    </div>
-</section>
+                <!-- Zona mejorada de HACER UNA CONSULTA ESPECIAL -->
+                <section class="relative z-0 bg-cover bg-center py-20" style="background-image: url('{{ asset('img/Consulta.jpg') }}')">
+                    <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+                        <div id="consulta-especial" class="bg-white shadow-2xl rounded-lg overflow-hidden mb-8 border border-gray-200">
+                            <h1 class="text-4xl font-bold text-[#0C1C3C] text-center mb-8 drop-shadow-lg pt-8">
+                                HACER UNA CONSULTA ESPECIAL
+                            </h1>
+                            <form class="p-8 space-y-6" method="POST" action="#">
+                                @csrf
+                                <div>
+                                    <label for="nombre" class="block text-lg font-semibold mb-1">Nombre</label>
+                                    <input type="text" id="nombre" name="nombre" required
+                                        class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                                        placeholder="Ingrese su nombre">
+                                </div>
+                                <div>
+                                    <label for="email" class="block text-lg font-semibold mb-1">Email</label>
+                                    <input type="email" id="email" name="email" required
+                                        class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                                        placeholder="Ingrese su email">
+                                </div>
+                                <div>
+                                    <label for="telefono" class="block text-lg font-semibold mb-1">Teléfono</label>
+                                    <input type="text" id="telefono" name="telefono"
+                                        class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                                        placeholder="Ingrese su teléfono">
+                                </div>
+                                <div>
+                                    <label for="mensaje" class="block text-lg font-semibold mb-1">Mensaje</label>
+                                    <textarea id="mensaje" name="mensaje" rows="4" required
+                                        class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
+                                        placeholder="Ingrese su mensaje"></textarea>
+                                </div>
+                                <div class="flex justify-center">
+                                    <button type="submit"
+                                        class="bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 px-8 rounded-lg shadow-lg transition">
+                                        Enviar Consulta
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                </section>
                 <!--/Content-->
-              </section>
-            </main>
 
+            </main>
         </div>
-        <footer style="background-color: #0D1831;" class="text-white py-8">
-    <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
-        <!-- Logo y nombre -->
-        <div class="flex items-center gap-4">
-            <img src="{{ asset('img/salud_total.svg') }}" alt="Salud Total Logo" class="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
-        </div>
-        <!-- Direcciones -->
-        <div class="flex flex-col gap-4 p-12">
-            <x-footer-icon icon="img/map-pin.svg" alt="Dirección">Av. Díaz Colodredo 1893</x-footer-icon>
-            <x-footer-icon icon="img/map-pin.svg" alt="Dirección">Av. Díaz Colodredo 1893</x-footer-icon>
-            <x-footer-icon icon="img/map-pin.svg" alt="Dirección">Av. Díaz Colodredo 1893</x-footer-icon>
-        </div>
-        <!-- Contacto -->
-        <div class="flex flex-col gap-4">
-            <x-footer-icon icon="img/mail.svg" alt="Email">SaludTotal1@gmail.com</x-footer-icon>
-            <x-footer-icon icon="img/phone.svg" alt="Teléfono">+54 3777-569034</x-footer-icon>
-        </div>
-    </div>
-</footer>
+        <footer id="footer" style="background-color: #0D1831;" class="text-white py-8">
+            <div class="max-w-7xl mx-auto px-4 flex flex-col md:flex-row justify-between items-center md:items-start gap-8">
+                <!-- Logo y nombre -->
+                <div class="flex items-center gap-4">
+                    <img src="{{ asset('img/salud_total.svg') }}" alt="Salud Total Logo" class="w-48 h-48 md:w-56 md:h-56 lg:w-64 lg:h-64">
+                </div>
+                <!-- Direcciones -->
+                <div class="flex flex-col gap-4 p-12">
+                    <x-footer-icon icon="img/map-pin.svg" alt="Dirección">Av. Díaz Colodredo 1893</x-footer-icon>
+                    <x-footer-icon icon="img/map-pin.svg" alt="Dirección">Av. Neustad 134</x-footer-icon>
+                    <x-footer-icon icon="img/map-pin.svg" alt="Dirección">José Gomez y Pujol</x-footer-icon>
+                </div>
+                <!-- Contacto -->
+                <div class="flex flex-col gap-4 p-12">
+                    <x-footer-icon icon="img/mail.svg" alt="Email">SaludTotal1@gmail.com</x-footer-icon>
+                    <x-footer-icon icon="img/phone.svg" alt="Teléfono">+54 3777-569034</x-footer-icon>
+                </div>
+            </div>
+        </footer>
         <!--/footer-->
 
     </div>

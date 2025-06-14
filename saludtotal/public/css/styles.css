@@ -1258,6 +1258,14 @@ th {
 .bg-black-darkest {
   background-color: #141418;
 }
+.bg-black-transparente {
+  background-color: rgba(0, 0, 0, 0.3);
+  transition: background-color 0.3s ease;
+}
+
+.bg-black-transparente:hover {
+  background-color: rgba(0, 0, 0, 0.8);
+}
 
 .bg-info {
   background-color: #52bcdc;
@@ -5586,6 +5594,27 @@ th {
   display: inline-flex;
 }
 
+.grid {
+    display: grid;
+}
+.grid-cols-1 {
+    grid-template-columns: repeat(1, minmax(0, 1fr));
+}
+.grid-cols-2 {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+}
+.gap {
+    gap: 0.5rem;
+}
+.gap-2 {
+    gap: 0.5rem;
+}
+.gap-4 {
+    gap: 1rem;
+}
+.gap-8 {
+    gap: 2rem;
+}
 .table {
   display: table;
 }
@@ -6010,6 +6039,12 @@ th {
 
 .h-64 {
   height: 16rem;
+}
+.h-80{
+    height: 20rem;
+}
+.h-96{
+    height: 24rem;
 }
 
 .h-auto {
@@ -11982,6 +12017,7 @@ th {
 }
 
 html{
+  scroll-behavior: smooth;
   line-height: normal;
   overflow-y: scroll;
 }
