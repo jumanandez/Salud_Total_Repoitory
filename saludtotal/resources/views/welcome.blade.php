@@ -22,7 +22,7 @@
     <div class="min-h-screen flex flex-col">
         <!--Header Section Starts Here-->
         <header class="bg-nav relative z-20">
-            <div class="flex justify-between">
+            <div id="top" class="flex justify-between">
 
                 <div class="p-1 mx-3 inline-flex items-center">
                     <i class="fa-solid fa-bars pr-2 text-white text-3xl cursor-pointer" onclick="sidebarToggle()"></i>
@@ -219,7 +219,12 @@
             </div>
         </footer>
         <!--/footer-->
-
+        <a href="#top"
+            id="btnScrollTop"
+            style="display: none; position: fixed; bottom: 20px; right: 20px; background: #2563eb; color: white; padding: 10px; border-radius: 9999px;"
+        >
+            <i class="fa-solid fa-arrow-up"></i>
+        </a>
     </div>
 
 </div>
