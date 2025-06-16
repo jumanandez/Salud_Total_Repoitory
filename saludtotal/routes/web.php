@@ -3,6 +3,7 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfesionalesController;
 use App\Http\Controllers\TurnoController;
+use App\Http\Controllers\TurnosController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -20,10 +21,11 @@ Route::get('profesionales/doctores', [ProfesionalesController::class, 'doctores'
 Route::get('profesionales/{doctor_id}/horarios', [ProfesionalesController::class, 'horarios'])->name('profesionales.horarios');
 Route::get('profesionales/doctor/{doctor_id}', [ProfesionalesController::class, 'nombreDoctorById'])->name('profesional.nombre');
 
-    Route::get('turnos/doctor/disponibles', [TurnoController::class, 'turnosDisponibles'])->name('turnos.disponibles');
+Route::get('turnos/doctor/disponibles', [TurnoController::class, 'turnosDisponibles'])->name('turnos.disponibles');
 Route::middleware('auth')->group(function () {
     Route::get('turnos/create', [TurnoController::class, 'create'])->name('turnos.create');
     Route::post('turnos/store', [TurnoController::class, 'store'])->name('turnos.store');
+    Route::get('/turnos/mis-turnos', [TurnoController::class, 'misTurnos'])->name('mis-turnos');
 });
 Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');

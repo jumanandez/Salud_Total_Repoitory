@@ -14,13 +14,7 @@ use App\ListarHorariosDisponibles;
 use Illuminate\Support\Facades\DB;
 class TurnoController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
-    {
-        //
-    }
+
 
     /**
      * Show the form for creating a new resource.
@@ -107,4 +101,13 @@ class TurnoController extends Controller
     {
         //
     }
+public function misTurnos()
+{
+    $user = Auth::user();
+
+    $turnos = Turno::where('paciente_id', $user->id)
+        ->get();
+    return view('turnos.misTurnos', compact('turnos'));
+}
+
 }
