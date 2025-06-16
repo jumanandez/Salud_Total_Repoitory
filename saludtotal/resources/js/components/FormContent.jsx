@@ -245,7 +245,11 @@ export const FormContent = () => {
                             </div>
                         )}
                     </div>
-                    {mensaje && !Object.keys(errores).length && !Object.keys(modalInfo).length && (
+                    {mensaje && 
+                        typeof errores === 'object' && errores !== null && 
+                        typeof modalInfo === 'object' && modalInfo !== null && 
+                        !Object.keys(errores).length && 
+                        !Object.keys(modalInfo).length && (
                         <AlertError mensaje={mensaje}/>
                     )}
                 </div>
