@@ -29,16 +29,9 @@
                 </div>
 
                 <div class="p-2 flex flex-row items-center">
-                    @guest
-                        <a href="{{route('login')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
-                            <span class="px-5">Pedir Turno</span>
-                        </a>
-                    @endguest
-                    @auth
-                        <a href="{{route('turnos.create')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
-                            <span class="px-5">Pedir Turno</span>
-                        </a>
-                    @endauth
+                    <a href="{{route('turnos.create')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
+                        <span class="px-5">Pedir Turno</span>
+                    </a>
                 </div>
             </div>
         </header>
