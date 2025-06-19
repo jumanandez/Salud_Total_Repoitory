@@ -53,7 +53,7 @@
                         </li>
                     </a>
                     <!-- End Menu Item  -->
-                    <a href="index.html"
+                    <a href="http://saludtotal.test/turnos/mis-turnos"
                     class="font-sans font-hairline hover:font-normal text-sm text-nav-item no-underline border-b border-light-border">
                         <li class="w-full h-full py-3 px-2 ">
                             <div class="w-full justify-center">

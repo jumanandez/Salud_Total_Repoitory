@@ -56338,3 +56338,15 @@ h1{
     z-index: auto;
   }
 }
+.modal-wrapper {
+  display: none;
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  justify-content: center;
+  align-items: center;
+  z-index: 9999;
+}
+
+.modal-wrapper.modal-is-open {
+  display: flex;
+}
