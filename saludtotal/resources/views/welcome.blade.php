@@ -154,31 +154,37 @@
                             <h1 class="text-4xl font-bold text-[#0C1C3C] text-center mb-8 drop-shadow-lg pt-8">
                                 HACER UNA CONSULTA ESPECIAL
                             </h1>
-                            <form class="p-8 space-y-6" method="POST" action="#">
-                                @csrf
+                                <div id="respuesta-container" class="hidden bg-green-200 text-green-800 text-center p-4 rounded-full mb-4">
+                                    <p id="respuesta" class="text-lg font-semibold text-center"></p>
+                                </div>
+                                <div id="error-container" class="hidden bg-red-200 text-red-800 text-center p-4 rounded-full mb-4">
+                                    <p id="mensaje-error" class="text-lg font-semibold text-center"></p>
+                                </div>
+                            <form id="consultaForm" class="p-8 space-y-6" method="POST" action="{{ route('consulta.store') }}">
+                                <meta name="csrf-token" content="{{ csrf_token() }}">
                                 <div>
-                                    <label for="nombre" class="block text-lg font-semibold mb-1">Nombre</label>
-                                    <input type="text" id="nombre" name="nombre" required
+                                    <label for="nombre_apellido" class="block text-lg font-semibold mb-1">Nombre</label>
+                                    <input type="text" id="nombre_apellido" name="nombre_apellido"
                                         class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
                                         placeholder="Ingrese su nombre">
                                 </div>
                                 <div>
                                     <label for="email" class="block text-lg font-semibold mb-1">Email</label>
-                                    <input type="email" id="email" name="email" required
+                                    <input type="text" id="email" name="email"
                                         class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-                                        placeholder="Ingrese su email">
+                                        placeholder="Ingrese su email" value="{{ old('email') }}">
                                 </div>
                                 <div>
                                     <label for="telefono" class="block text-lg font-semibold mb-1">Teléfono</label>
                                     <input type="text" id="telefono" name="telefono"
                                         class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-                                        placeholder="Ingrese su teléfono">
+                                        placeholder="Ingrese su teléfono" value="{{ old('telefono') }}">
                                 </div>
                                 <div>
                                     <label for="mensaje" class="block text-lg font-semibold mb-1">Mensaje</label>
-                                    <textarea id="mensaje" name="mensaje" rows="4" required
+                                    <textarea id="mensaje" name="mensaje" rows="4"
                                         class="border border-gray-300 rounded-lg p-3 w-full focus:outline-none focus:ring-2 focus:ring-blue-400 transition"
-                                        placeholder="Ingrese su mensaje"></textarea>
+                                        placeholder="Ingrese su mensaje" value="{{ old('mensaje') }}"></textarea>
                                 </div>
                                 <div class="flex justify-center">
                                     <button type="submit"
@@ -224,5 +230,6 @@
 
 </div>
 <script src="{{asset('js/main.js')}}"></script>
+<script src="{{asset('js/form-consulta.js')}}"></script>
 </body>
 </html>

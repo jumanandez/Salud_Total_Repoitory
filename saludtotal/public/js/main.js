@@ -74,7 +74,6 @@ function selectDoctor(element) {
 
 const btnScrollTop = document.getElementById('btnScrollTop');
 if (btnScrollTop) {
-    console.log(btnScrollTop);
 
     window.addEventListener('scroll', () => {
         if (window.scrollY > 300) {

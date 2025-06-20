@@ -3,6 +3,8 @@
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ProfesionalesController;
 use App\Http\Controllers\TurnoController;
+use App\Http\Controllers\TurnosController;
+use App\Http\Controllers\ConsultaController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
@@ -22,7 +24,7 @@ Route::get('profesionales/doctor/{doctor_id}', [ProfesionalesController::class, 
 Route::get('turnos', [TurnoController::class, 'index'])->name('turnos.index');
 Route::get('turnos/doctor/disponibles', [TurnoController::class, 'turnosDisponibles'])->name('turnos.disponibles');
 
-
+Route::post('/consulta/store', [ConsultaController::class, 'store'])->name('consulta.store');
 Route::middleware('auth')->group(function () {
     Route::get('turnos/create', [TurnoController::class, 'create'])->name('turnos.create');
     Route::post('turnos/store', [TurnoController::class, 'store'])->name('turnos.store');
