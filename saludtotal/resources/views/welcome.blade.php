@@ -22,23 +22,16 @@
     <div class="min-h-screen flex flex-col">
         <!--Header Section Starts Here-->
         <header class="bg-nav relative z-20">
-            <div class="flex justify-between">
+            <div id="top" class="flex justify-between">
 
                 <div class="p-1 mx-3 inline-flex items-center">
                     <i class="fa-solid fa-bars pr-2 text-white text-3xl cursor-pointer" onclick="sidebarToggle()"></i>
                 </div>
 
                 <div class="p-2 flex flex-row items-center">
-                    @guest
-                        <a href="{{route('login')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
-                            <span class="px-5">Pedir Turno</span>
-                        </a>
-                    @endguest
-                    @auth
-                        <a href="{{route('turnos.create')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
-                            <span class="px-5">Pedir Turno</span>
-                        </a>
-                    @endauth
+                    <a href="{{route('turnos.create')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
+                        <span class="px-5">Pedir Turno</span>
+                    </a>
                 </div>
             </div>
         </header>
@@ -219,7 +212,12 @@
             </div>
         </footer>
         <!--/footer-->
-
+        <a href="#top"
+            id="btnScrollTop"
+            style="display: none; position: fixed; bottom: 20px; right: 20px; background: #2563eb; color: white; padding: 10px; border-radius: 9999px;"
+        >
+            <i class="fa-solid fa-arrow-up"></i>
+        </a>
     </div>
 
 </div>

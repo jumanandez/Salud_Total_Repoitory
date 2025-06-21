@@ -24,13 +24,11 @@
         <!--Header Section Starts Here-->
         <header class="bg-nav">
             <div class="flex justify-between">
-
                 <div class="p-1 mx-3 inline-flex items-center">
                     <i class="fa-solid fa-bars pr-2 text-white text-3xl cursor-pointer" onclick="sidebarToggle()"></i>
                 </div>
-
                 <div class="p-1 inline-flex items-center">
-                    <a href="#">
+                    <a href="{{ route('welcome') }}">
                         <img src="{{asset('img/salud_total.svg')}}" alt="salud total logo" class="w-32 h-10">
                     </a>
                 </div>
@@ -41,10 +39,9 @@
         <div class="flex flex-1">
             <!--Sidebar-->
             <aside id="sidebar" class="bg-side-nav  border-r border-side-nav">
-
                 <ul class="list-reset flex flex-col">
                     <!-- Menu Item  -->
-                    <a id="home" href="{{route('welcome')}}"
+                    <a title="Inicio" id="home" href="{{route('welcome')}}"
                     class="font-sans font-hairline hover:font-normal text-sm text-nav-item no-underline border-b border-light-border">
                         <li class="w-full h-full py-3 px-2 ">
                             <div class="w-full justify-center">
@@ -61,7 +58,17 @@
                             </div>
                         </li>
                     </a>
-
+                    @auth
+                    <form action="{{ route('logout') }}" method='POST'>
+                        @csrf
+                        <button title="Cerrar sesión" class="text-white font-semibold p-2 no-underline hidden md:block lg:block  border-b border-light-border "
+                        type='submit' :href="route('logout')"
+                        onclick="event.preventDefault();
+                                    this.closest('form').submit();">
+                            <i class="fa-solid fa-right-from-bracket float-top mx-2 text-2xl" style="transform: scaleX(-1);"></i>
+                        </button>
+                    </form>
+                @endauth
                 </ul>
             </aside>
             <!--/Sidebar-->

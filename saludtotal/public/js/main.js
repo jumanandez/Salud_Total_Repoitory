@@ -73,3 +73,19 @@ function selectDoctor(element) {
         <p class='font-semibold'>${element.textContent}</p>`;
     }
 }
+
+const btnScrollTop = document.getElementById('btnScrollTop');
+if (btnScrollTop) {
+    console.log(btnScrollTop);
+
+    window.addEventListener('scroll', () => {
+        if (window.scrollY > 300) {
+            // btnScrollTop.classList.remove('hidden');
+            btnScrollTop.style.display = 'block';
+        } else {
+            // btnScrollTop.classList.add('hidden');
+            btnScrollTop.style.display = 'none';
+        }
+    });
+}
+
