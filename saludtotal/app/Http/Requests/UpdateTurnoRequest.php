@@ -11,7 +11,7 @@ class UpdateTurnoRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return false;
+        return true;
     }
 
     /**
@@ -22,7 +22,9 @@ class UpdateTurnoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            //
+            'fecha' => ['sometimes', 'date_format:Y-m-d', 'after_or_equal:today'],
+            'hora' => 'sometimes|date_format:H:i',
+            'estado' => 'sometimes|in:activo,cancelado,completado'
         ];
     }
 }

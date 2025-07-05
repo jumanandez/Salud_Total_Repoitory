@@ -23,6 +23,11 @@ class TurnoController extends Controller
     {
         return view('turnos.create');
     }
+    public function index()
+    {
+        $turnos = Turno::all();
+        return response()->json($turnos);
+    }
 
     /**
      * Store a newly created resource in storage.
@@ -36,9 +41,9 @@ class TurnoController extends Controller
             'fecha' => $turnoValidado['fecha'],
             'hora' => $turnoValidado['hora'],
             'estado' => 'activo'
-        ])->save();
+        ]);
 
-        return response()->json($turnoValidado);
+        return response()->json($turnoNuevo);
     }
     public function turnosDisponibles(Request $request)
     {
