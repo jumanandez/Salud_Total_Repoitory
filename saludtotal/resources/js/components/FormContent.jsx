@@ -245,10 +245,10 @@ export const FormContent = () => {
                             </div>
                         )}
                     </div>
-                    {mensaje && 
-                        typeof errores === 'object' && errores !== null && 
-                        typeof modalInfo === 'object' && modalInfo !== null && 
-                        !Object.keys(errores).length && 
+                    {mensaje &&
+                        typeof errores === 'object' && errores !== null &&
+                        typeof modalInfo === 'object' && modalInfo !== null &&
+                        !Object.keys(errores).length &&
                         !Object.keys(modalInfo).length && (
                         <AlertError mensaje={mensaje}/>
                     )}
@@ -265,7 +265,7 @@ export const FormContent = () => {
                     <DetalleDoctor id={modalInfo.doctor_id} fecha={modalInfo.fecha} hora={modalInfo.hora}/>
                     <div className="pt-4 text-right">
                         <button type="button" className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 transition"
-                            onClick={()=> {window.location.assign('/dashboard')}}>
+                            onClick={()=> {window.location.assign('/turnos/mis-turnos')}}>
                             Volver
                         </button>
                     </div>
