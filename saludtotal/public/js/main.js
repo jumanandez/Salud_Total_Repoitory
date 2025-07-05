@@ -36,8 +36,6 @@ function toggleModal(action, elem_trigger)
         }
     });
 }
-
-
 // Check if there is modals on the page
 if (document.querySelector('.modal-wrapper'))
 {

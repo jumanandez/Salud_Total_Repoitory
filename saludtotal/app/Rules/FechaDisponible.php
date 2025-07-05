@@ -23,9 +23,9 @@ class FechaDisponible implements ValidationRule
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
         if (!strtotime($value)) {
-    $fail('La fecha proporcionada no es válida.');
-    return;
-}
+            $fail('La fecha proporcionada no es válida.');
+            return;
+        }
 
         $diaDeLaSemanaPedido = Carbon::parse($value, 'America/Argentina/Buenos_Aires')->dayOfWeekIso;
 
@@ -33,7 +33,7 @@ class FechaDisponible implements ValidationRule
             where('doctor_id', $this->doctor_id)
             ->where('dia_semana', $diaDeLaSemanaPedido)
             ->exists();
-        $doctor = $this->doctor_id;
+
         if (!$existeEnDisponibilidades) {
             $fail('El doctor no atiende el día seleccionado.');
         }
