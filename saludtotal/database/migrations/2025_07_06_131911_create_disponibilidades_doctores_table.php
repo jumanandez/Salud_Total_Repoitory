@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('dispoibilidades_doctores', function (Blueprint $table) {
+        Schema::create('disponibilidades_doctores', function (Blueprint $table) {
             $table->bigInteger('disponibilidad_id')->autoIncrement();
             $table->bigInteger('doctor_id');
             $table->foreign('doctor_id')->references('doctor_id')->on('doctores')->onDelete('cascade');

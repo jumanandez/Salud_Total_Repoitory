@@ -12,7 +12,7 @@ return new class extends Migration
     public function up(): void
     {
         Schema::create('tiempo_consulta', function (Blueprint $table) {
-            $table->bigInteger('id')->autoincrement();
+            $table->bigInteger('id')->autoIncrement();
             $table->bigInteger('doctor_id');
             $table->foreign('doctor_id')->references('doctor_id')->on('doctores')->onDelete('cascade');
             $table->integer('tiempo_minutos');
