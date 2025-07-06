@@ -29,11 +29,19 @@
                 <div class="p-1 mx-3 inline-flex items-center">
                     <i class="fa-solid fa-bars pr-2 text-white text-3xl cursor-pointer" onclick="sidebarToggle()"></i>
                 </div>
+                <div>
 
-                <div class="p-2 flex flex-row items-center">
-                    <a href="{{route('turnos.create')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
-                        <span class="px-5">Pedir Turno</span>
-                    </a>
+                    <div class="p-2 flex flex-row items-center gap-4">
+                        @auth
+                            <a href="{{ route('mis-turnos') }}"
+                                class="text-white bg-blue-900 hover:bg-blue-700 p-2 rounded-lg">
+                                <span class="px-5">Mis Turnos</span>
+                            </a>
+                        @endauth
+                        <a href="{{route('turnos.create')}}" class="text-white bg-green-dark hover:bg-green-800 p-2 rounded-full">
+                            <span class="px-5">Pedir Turno</span>
+                        </a>
+                    </div>
                 </div>
             </div>
         </header>
