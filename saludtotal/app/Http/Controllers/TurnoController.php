@@ -12,6 +12,8 @@ use App\Rules\FechaDisponible;
 use Carbon\Carbon;
 use App\ListarHorariosDisponibles;
 use Illuminate\Support\Facades\DB;
+use App\Models\solicitudReprogramacion;
+use App\Http\Requests\StoreSolicitudReprogramacionRequest;
 class TurnoController extends Controller
 {
 
@@ -22,6 +24,11 @@ class TurnoController extends Controller
     public function create()
     {
         return view('turnos.create');
+    }
+    public function index()
+    {
+        $turnos = Turno::all();
+        return response()->json($turnos);
     }
 
     /**
@@ -36,9 +43,9 @@ class TurnoController extends Controller
             'fecha' => $turnoValidado['fecha'],
             'hora' => $turnoValidado['hora'],
             'estado' => 'activo'
-        ])->save();
+        ]);
 
-        return response()->json($turnoValidado);
+        return response()->json($turnoNuevo);
     }
     public function turnosDisponibles(Request $request)
     {
@@ -70,44 +77,108 @@ class TurnoController extends Controller
         return response()->json($slots);
     }
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Turno $turno)
+    public function turnoDetails($turno_id)
     {
-        //
+        $turno = Turno::find($turno_id);
+
+        return view('turnos.turnoDetails', compact('turno'));
+    }
+    public function misTurnos(Request $request)
+    {
+        $user = auth()->user();
+
+        $order = $request->get('orden', 'desc');
+
+        $turnos = Turno::where('paciente_id', $user->id)
+            ->when($request->estado, function ($query, $estado) {
+                return $query->where('estado', $estado);
+            })
+            ->orderBy('fecha', $order)
+            ->paginate(5)
+            ->appends($request->query());
+
+        return view('turnos.misTurnos', compact('turnos'));
     }
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Turno $turno)
+    public function solicitarCancelacion(Request $request, $turno_id)
     {
-        //
+        try{
+            $turno = Turno::find($turno_id);
+            $turno->
+            update([
+            'estado' => 'pendiente',
+            'fecha_solicitud_cancelacion' => now(),
+            'solicita_cancelacion' => true,
+            'cancelado_por' => Auth::user()->id,
+            'fecha_edicion' => now(),
+            ]);
+            $turno->save();
+        }catch(Exception $e){
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
+
+        return response()->json([
+            'mensaje' => 'Solicitud de cancelación enviada correctamente.',
+            'turno' => $turno,
+            'request' => $request
+        ]);
+    }
+    public function cancelar(Turno $turno)
+    {
+        try{
+            $turno->update([
+            'estado' => 'cancelado',
+            'fecha_cancelacion' => now(),
+            'cancelado_por' => Auth::user()->id,
+            'fecha_edicion' => now(),
+            ]);
+        }catch(Exception $e){
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
+
+        return response()->json(['mensaje' => 'Turno cancelado correctamente.']);
+    }
+    public function solicitarReprogramacion(StoreSolicitudReprogramacionRequest $request)
+    {
+        $validated = $request->validated();
+        try{
+            $solicitud = solicitudReprogramacion::create([
+                'turno_id' => $validated['turno_id'],
+                'fecha' => $validated['nueva_fecha'],
+                'hora' => $validated['nueva_hora'],
+                'estado' => 'pendiente'
+            ]);
+            $solicitud->save();
+            $turno = Turno::find($validated['turno_id']);
+            $turno->update([
+                'estado' => 'pendiente',
+                'fecha_solicitud_reprogramacion' => now(),
+                'solicita_reprogramacion' => true,
+                'reprogramado_por' => Auth::user()->id,
+            ]);
+        }catch(Exception $e){
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
+
+        return response()->json(['mensaje' => 'Solicitud de reprogramación enviada correctamente.',
+                                'turno' => $solicitud]);
+    }
+    public function reprogramar(Turno $turno)
+    {
+        try{
+            $turno->update([
+            'estado' => 'activo',
+            'reprogramado' => true,
+            'fecha_reprogramacion' => now(),
+            'reprogramado_por' => Auth::user()->id,
+            'fecha_edicion' => now(),
+            ]);
+        }catch(Exception $e){
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
+
+        return response()->json(['mensaje' => 'Reprogramación enviada correctamente.']);
     }
 
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(UpdateTurnoRequest $request, Turno $turno)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Turno $turno)
-    {
-        //
-    }
-public function misTurnos()
-{
-    $user = Auth::user();
-
-    $turnos = Turno::where('paciente_id', $user->id)
-        ->get();
-    return view('turnos.misTurnos', compact('turnos'));
-}
 
 }

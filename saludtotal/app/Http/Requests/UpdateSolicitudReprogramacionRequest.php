@@ -4,14 +4,14 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateTurnoRequest extends FormRequest
+class UpdateSolicitudReprogramacionRequest extends FormRequest
 {
     /**
      * Determine if the user is authorized to make this request.
      */
     public function authorize(): bool
     {
-        return true;
+        return false;
     }
 
     /**
@@ -22,9 +22,7 @@ class UpdateTurnoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'fecha' => ['sometimes', 'date_format:Y-m-d', 'after_or_equal:today'],
-            'hora' => 'sometimes|date_format:H:i',
-            'estado' => 'sometimes|in:activo,cancelado,completado'
+            //
         ];
     }
 }

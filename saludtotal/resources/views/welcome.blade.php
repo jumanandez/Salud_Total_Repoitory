@@ -9,6 +9,8 @@
     <!-- Css -->
     <link rel="stylesheet" href={{asset("css/styles.css")}}>
     <link rel="stylesheet" href={{asset("css/all.css")}}>
+
+    <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css?family=Source+Sans+Pro:400,400i,600,600i,700,700i" rel="stylesheet">
     <link href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css" rel="stylesheet">
 
@@ -52,7 +54,7 @@
                         </li>
                     </a>
                     <!-- Menu Item  -->
-                    <a href="index.html"
+                    <a href="{{ route('mis-turnos') }}"
                     class="font-sans font-hairline hover:font-normal text-sm text-nav-item no-underline">
                         <li class=" w-full h-full py-3 px-2 border-b border-light-border">
                             <div class="w-full">
