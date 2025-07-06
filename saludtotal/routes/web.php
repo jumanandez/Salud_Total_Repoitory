@@ -31,6 +31,7 @@ Route::post('/consulta/store', [ConsultaController::class, 'store'])->name('cons
 Route::middleware('auth')->group(function () {
     Route::get('turnos/create', [TurnoController::class, 'create'])->name('turnos.create');
     Route::post('turnos/store', [TurnoController::class, 'store'])->name('turnos.store');
+    Route::post('turnos/store-desktop', [TurnoController::class, 'storeDesktop'])->name('turnos.store.desktop');
 
     Route::get('/turnos/mis-turnos', [TurnoController::class, 'misTurnos'])->name('mis-turnos');
 
