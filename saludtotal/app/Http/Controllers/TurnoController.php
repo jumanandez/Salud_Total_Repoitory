@@ -94,18 +94,138 @@ class TurnoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTurnoRequest $request)
+    public function store(Request $request)
     {
-        $turnoValidado = $request->validated();
-        $turnoNuevo = Turno::create([
-            'paciente_id' => Auth::user()->id,
-            'doctor_id' => $turnoValidado['doctor_id'],
-            'fecha' => $turnoValidado['fecha'],
-            'hora' => $turnoValidado['hora'],
-            'estado' => 'activo'
-        ]);
+        try {
+            // Validación de los datos
+            $validated = $request->validate([
+                // Datos del paciente
+                'paciente_nombre_apellido' => 'required|string|max:255',
+                'paciente_telefono' => 'nullable|string|max:20',
+                'paciente_email' => 'required|email|max:255',
+                
+                // Datos del turno
+                'doctor_id' => 'required|integer|exists:doctores,doctor_id',
+                'fecha' => 'required|date|after_or_equal:today',
+                'hora' => 'required|date_format:H:i',
+                'especialidad_id' => 'required|integer|exists:especialidades,especialidad_id',
+            ]);
 
-        return response()->json($turnoNuevo);
+            DB::beginTransaction();
+
+            // 1. Verificar si el paciente ya existe por email
+            $paciente = DB::table('pacientes')
+                ->where('email', $validated['paciente_email'])
+                ->first();
+
+            // 2. Si no existe, crear el paciente
+            if (!$paciente) {
+                $pacienteId = DB::table('pacientes')->insertGetId([
+                    'nombre_apellido' => $validated['paciente_nombre_apellido'],
+                    'telefono' => $validated['paciente_telefono'] ?? null,
+                    'email' => $validated['paciente_email'],
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]);
+            } else {
+                $pacienteId = $paciente->id;
+            }
+
+            // 3. Verificar disponibilidad del turno
+            $turnoExistente = DB::table('turnos')
+                ->where('doctor_id', $validated['doctor_id'])
+                ->where('fecha', $validated['fecha'])
+                ->where('hora', $validated['hora'])
+                ->where('estado', '!=', 'cancelado')
+                ->first();
+
+            if ($turnoExistente) {
+                throw new \Exception('El horario seleccionado ya está ocupado');
+            }
+
+            // 4. Crear el turno
+            $turnoId = DB::table('turnos')->insertGetId([
+                'paciente_id' => $pacienteId,
+                'doctor_id' => $validated['doctor_id'],
+                'fecha' => $validated['fecha'],
+                'hora' => $validated['hora'],
+                'estado' => 'activo',
+                'created_at' => now(),
+                'updated_at' => now(),
+            ]);
+
+            // 5. Obtener el turno completo con todas las relaciones
+            $turnoCompleto = DB::table('turnos')
+                ->join('pacientes', 'turnos.paciente_id', '=', 'pacientes.id')
+                ->join('doctores', 'turnos.doctor_id', '=', 'doctores.doctor_id')
+                ->join('especialidades', 'doctores.especialidad', '=', 'especialidades.especialidad_id')
+                ->where('turnos.turno_id', $turnoId)
+                ->select(
+                    'turnos.turno_id as id',
+                    'turnos.paciente_id',
+                    'turnos.doctor_id',
+                    'turnos.fecha',
+                    'turnos.hora',
+                    'turnos.estado',
+                    'pacientes.id as paciente_id',
+                    'pacientes.nombre_apellido as paciente_nombre_apellido',
+                    'pacientes.email as paciente_email',
+                    'pacientes.telefono as paciente_telefono',
+                    'doctores.doctor_id',
+                    'doctores.nombre_apellido as doctor_nombre_apellido',
+                    'especialidades.especialidad_id',
+                    'especialidades.nombre as especialidad_nombre'
+                )
+                ->first();
+
+            DB::commit();
+
+            // 6. Transformar a la estructura esperada
+            $turnoTransformado = [
+                'id' => $turnoCompleto->id,
+                'paciente_id' => $turnoCompleto->paciente_id,
+                'doctor_id' => $turnoCompleto->doctor_id,
+                'fecha' => $turnoCompleto->fecha,
+                'hora' => $turnoCompleto->hora,
+                'estado' => $turnoCompleto->estado,
+                'paciente' => [
+                    'id' => $turnoCompleto->paciente_id,
+                    'name' => $turnoCompleto->paciente_nombre_apellido,
+                    'email' => $turnoCompleto->paciente_email,
+                    'telefono' => $turnoCompleto->paciente_telefono,
+                ],
+                'doctor' => [
+                    'doctor_id' => $turnoCompleto->doctor_id,
+                    'nombre_apellido' => $turnoCompleto->doctor_nombre_apellido,
+                    'especialidad' => [
+                        'especialidad_id' => $turnoCompleto->especialidad_id,
+                        'nombre' => $turnoCompleto->especialidad_nombre
+                    ]
+                ]
+            ];
+
+            return response()->json([
+                'success' => true,
+                'message' => 'Turno creado exitosamente',
+                'data' => $turnoTransformado
+            ], 201);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'error' => 'Datos de entrada inválidos',
+                'message' => 'Por favor verifica los datos ingresados',
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            DB::rollback();
+            return response()->json([
+                'success' => false,
+                'error' => 'Error al crear el turno',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
     public function turnosDisponibles(Request $request)
     {

@@ -53,4 +53,7 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 });
 
+// También agregar una ruta sin middleware para la API
+Route::post('api/turnos', [TurnoController::class, 'store'])->name('api.turnos.store');
+
 require __DIR__.'/auth.php';
