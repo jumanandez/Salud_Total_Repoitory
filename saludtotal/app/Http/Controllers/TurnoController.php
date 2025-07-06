@@ -14,6 +14,8 @@ use App\ListarHorariosDisponibles;
 use Illuminate\Support\Facades\DB;
 use App\Models\solicitudReprogramacion;
 use App\Http\Requests\StoreSolicitudReprogramacionRequest;
+use App\Mail\NotificacionTurno;
+use Illuminate\Support\Facades\Mail;
 class TurnoController extends Controller
 {
 
@@ -44,6 +46,19 @@ class TurnoController extends Controller
             'hora' => $turnoValidado['hora'],
             'estado' => 'activo'
         ]);
+        $turnoNuevo->save();
+        try{
+            Mail::to(Auth::user()->email)->send(new NotificacionTurno(
+                Auth::user()->nombre_apellido,
+                $turnoNuevo['doctor_id'],
+                $turnoNuevo->turno_id,
+                $turnoNuevo['fecha'],
+                $turnoNuevo['hora'],
+            ));
+        }catch (\Exception $e) {
+            report($e); // opcional
+            return response()->json(['mensaje' => 'Error al enviar correo', 'detalle' => $e->getMessage()], 500);
+        }
 
         return response()->json($turnoNuevo);
     }
