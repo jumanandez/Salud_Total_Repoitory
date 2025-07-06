@@ -94,7 +94,7 @@ class TurnoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(Request $request)
+    public function storeDesktop(Request $request)
     {
         try {
             // Validación de los datos
