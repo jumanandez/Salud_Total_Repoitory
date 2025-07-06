@@ -21,12 +21,12 @@
             <x-turno.info label="Doctor:" valor="{{ $turno->doctor->nombre_apellido }}">
                 <i class="fa-solid fa-user text-xl text-blue-900"></i>
             </x-turno.info>
-            <x-turno.info label="Creado el:" valor="{{ $turno->fecha_creacion->format('d/m/Y') }}">
+            <x-turno.info label="Creado el:" valor="{{ $turno->created_at->format('d/m/Y') }}">
                 <i class="fa-solid fa-calendar-days text-xl text-gray-700"></i>
             </x-turno.info>
-            @if($turno->fecha_edicion)
-            <x-turno.info label="Última edición:" valor="{{ $turno->fecha_edicion->format('d/m/Y') ?? 'Sin ediciones' }}">
-                <i class="fa-solid fa-pen-to-square text-xl text-gray-{{$turno->fecha_edicion ? '700' : '500'}} hover:text-gray-700"></i>
+            @if($turno->updated_at)
+            <x-turno.info label="Última edición:" valor="{{ $turno->updated_at->format('d/m/Y') ?? 'Sin ediciones' }}">
+                <i class="fa-solid fa-pen-to-square text-xl text-gray-{{$turno->updated_at ? '700' : '500'}} hover:text-gray-700"></i>
             </x-turno.info>
             @endif
             <x-turno.info label="¿Reprogramado?:" valor="{{ $turno->reprogramado ? 'Sí' : 'No' }}">
@@ -62,8 +62,8 @@
                     <i class="fa-solid fa-user text-xl text-gray-700"></i>
                 </x-turno.info>
             @endif
-            @if ($turno->fecha_cancelacion && !$turno->cancelado_por)
-                    <x-turno.info label="Fecha de cancelación:" valor="{{ $turno->fecha_cancelacion->setTimezone('America/Argentina/Buenos_Aires')->format('d/m/Y H:i') }}">
+            @if ($turno->canceled_at && !$turno->cancelado_por)
+                    <x-turno.info label="Fecha de cancelación:" valor="{{ $turno->canceled_at->setTimezone('America/Argentina/Buenos_Aires')->format('d/m/Y H:i') }}">
                         <i class="fa-solid fa-calendar-days text-xl text-gray-700"></i>
                     </x-turno.info>
                     <x-turno.info label="Cancelado por:" valor="Profesional">
@@ -76,8 +76,8 @@
             {{-- Botón Reprogramación --}}
                 <button id="boton-reprogramar" data-modal='centeredFormModal'
                     class="modal-trigger w-full md:w-auto font-semibold px-6 py-2 rounded-lg transition
-                        {{ $turno->solicita_reprogramacion || $turno->cancelado_por ? 'bg-yellow-300 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-600 text-white' }}"
-                    {{ $turno->solicita_reprogramacion || $turno->cancelado_por ? 'disabled title=Ya+solicitado+o+cancelado' : '' }}>
+                        {{ $turno->solicita_reprogramacion || $turno->solicita_cancelacion ? 'bg-yellow-300 cursor-not-allowed' : 'bg-yellow-500 hover:bg-yellow-600 text-white' }}"
+                    {{ $turno->solicita_reprogramacion || $turno->solicita_cancelacion ? 'disabled title=Ya+solicitado+o+cancelado' : '' }}>
                     Solicitar Reprogramación
                 </button>
 

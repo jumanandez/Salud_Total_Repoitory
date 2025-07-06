@@ -11,8 +11,6 @@ use App\Models\Especialidad;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
 class Turno extends Model
 {
-    const CREATED_AT = 'fecha_creacion';
-    const UPDATED_AT = 'fecha_edicion';
     protected $table = 'turnos';
     protected $primaryKey = 'turno_id';
     protected $fillable = [
@@ -65,7 +63,7 @@ class Turno extends Model
             'doctor_id',          // foreign key en `turnos` que apunta a `doctors.id`
             'especialidad_id',    // foreign key en `doctors` que apunta a `especialidades.especialidad_id`
             'doctor_id',          // local key en `turnos`
-            'especialidad'        // local key en `doctors` que apunta a especialidad_id
+            'especialidad_id'        // local key en `doctors` que apunta a especialidad_id
         );
     }
 }

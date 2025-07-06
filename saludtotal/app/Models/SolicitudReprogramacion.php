@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 class SolicitudReprogramacion extends Model
 {
     protected $table = 'solicitud_reprogramacion';
+    protected $primaryKey = 'solicitud_id';
     protected $fillable = [
         'turno_id',
         'fecha',

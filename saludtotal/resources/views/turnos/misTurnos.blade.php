@@ -43,6 +43,13 @@
                         </div>
                     </div>
                 </form>
+                <div class="flex justify-center mb-4">
+                    <a href="{{ route('turnos.create') }}"
+                        class="bg-white shadow rounded-lg px-5 py-3 hover:bg-blue-50 transition">
+                        <i class="fa-sharp fa-solid fa-plus text-2xl text-red-700"></i>
+                        <span class="font-semibold text-xl align-center text-blue-800"> Pedir Turno</span>
+                    </a>
+                </div>
                 <div class="space-y-4">
                     @foreach ($turnos as $turno)
                         <x-item-turno :turno="$turno" />

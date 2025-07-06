@@ -41,7 +41,7 @@ export async function pedirTurno(e, doctor, fecha, hora, csrfToken) {
                 return {
                     exito: false,
                     error: true,
-                    mensaje: data.message || 'Error del servidor',
+                    mensaje: data.detalle || 'Error del servidor',
                     codigo: response.status
                 };
             }
@@ -51,7 +51,7 @@ export async function pedirTurno(e, doctor, fecha, hora, csrfToken) {
             exito: true,
             error: false,
             datos: data,
-            mensaje: data.message || 'Turno creado exitosamente'
+            mensaje: data.mensaje || 'Turno creado exitosamente'
         };
     } catch (err) {
         // Error de red o conexión

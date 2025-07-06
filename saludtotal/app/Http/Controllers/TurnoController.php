@@ -14,6 +14,8 @@ use App\ListarHorariosDisponibles;
 use Illuminate\Support\Facades\DB;
 use App\Models\solicitudReprogramacion;
 use App\Http\Requests\StoreSolicitudReprogramacionRequest;
+use App\Mail\NotificacionTurno;
+use Illuminate\Support\Facades\Mail;
 class TurnoController extends Controller
 {
 
@@ -94,6 +96,29 @@ class TurnoController extends Controller
     /**
      * Store a newly created resource in storage.
      */
+    public function store(StoreTurnoRequest $request){
+                $turnoValidado = $request->validated();
+        $turnoNuevo = Turno::create([
+            'paciente_id' => Auth::user()->paciente_id,
+            'doctor_id' => $turnoValidado['doctor_id'],
+            'fecha' => $turnoValidado['fecha'],
+            'hora' => $turnoValidado['hora'],
+            'estado' => 'activo'
+        ]);
+        $turnoNuevo->save();
+        try{
+            Mail::to(Auth::user()->email)->send(new NotificacionTurno(
+                Auth::user()->nombre_apellido,
+                $turnoNuevo['doctor_id'],
+                $turnoNuevo->turno_id,
+                $turnoNuevo['fecha'],
+                $turnoNuevo['hora'],
+            ));
+        }catch (\Exception $e) {
+            report($e); // opcional
+            return response()->json(['mensaje' => 'Error al enviar correo', 'detalle' => $e->getMessage()], 500);
+        }
+    }
     public function storeDesktop(Request $request)
     {
         try {
@@ -269,7 +294,7 @@ class TurnoController extends Controller
 
         $order = $request->get('orden', 'desc');
 
-        $turnos = Turno::where('paciente_id', $user->id)
+        $turnos = Turno::where('paciente_id', $user->paciente_id)
             ->when($request->estado, function ($query, $estado) {
                 return $query->where('estado', $estado);
             })
@@ -289,7 +314,7 @@ class TurnoController extends Controller
             'estado' => 'pendiente',
             'fecha_solicitud_cancelacion' => now(),
             'solicita_cancelacion' => true,
-            'cancelado_por' => Auth::user()->id,
+            'cancelado_por' => Auth::user()->paciente_id,
             'fecha_edicion' => now(),
             ]);
             $turno->save();
@@ -309,7 +334,7 @@ class TurnoController extends Controller
             $turno->update([
             'estado' => 'cancelado',
             'fecha_cancelacion' => now(),
-            'cancelado_por' => Auth::user()->id,
+            'cancelado_por' => Auth::user()->paciente_id,
             'fecha_edicion' => now(),
             ]);
         }catch(Exception $e){
@@ -334,7 +359,7 @@ class TurnoController extends Controller
                 'estado' => 'pendiente',
                 'fecha_solicitud_reprogramacion' => now(),
                 'solicita_reprogramacion' => true,
-                'reprogramado_por' => Auth::user()->id,
+                'reprogramado_por' => Auth::user()->paciente_id,
             ]);
         }catch(Exception $e){
             return response()->json(['mensaje' => $e->getMessage()]);
@@ -346,13 +371,14 @@ class TurnoController extends Controller
     public function reprogramar(Turno $turno)
     {
         try{
-            $turno->update([
-            'estado' => 'activo',
-            'reprogramado' => true,
-            'fecha_reprogramacion' => now(),
-            'reprogramado_por' => Auth::user()->id,
-            'fecha_edicion' => now(),
-            ]);
+            //USAR EL PACIENTE_ID DEL TURNO
+            // $turno->update([
+            // 'estado' => 'activo',
+            // 'reprogramado' => true,
+            // 'fecha_reprogramacion' => now(),
+            // 'reprogramado_por' => Auth::user()->paciente_id,
+            // 'fecha_edicion' => now(),
+            // ]);
         }catch(Exception $e){
             return response()->json(['mensaje' => $e->getMessage()]);
         }

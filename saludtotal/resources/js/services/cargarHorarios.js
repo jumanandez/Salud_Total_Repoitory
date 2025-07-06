@@ -31,7 +31,7 @@ export const cargarHorarios = async (doctor_id) => {
             });
         }
     });
-
+    console.log(horariosParaComponente);
     return horariosParaComponente;
 
 }

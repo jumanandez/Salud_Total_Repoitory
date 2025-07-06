@@ -20,7 +20,11 @@ class ProfesionalesController extends Controller
     }
     public function doctoresByEspecialidad($especialidadId)
     {
-        $doctores = Doctor::query()->where('especialidad', $especialidadId)->get();
+        try{
+        $doctores = Doctor::where('especialidad_id', $especialidadId)->get();
+        }catch(Exception $e){
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
         return response()->json($doctores);
     }
 
@@ -38,7 +42,7 @@ class ProfesionalesController extends Controller
     }
     public function horarios($doctorId)
     {
-        $horarios = HorarioDisponible::query()->where('doctor_id', $doctorId)->where('activo', '1')->get();
+        $horarios = HorarioDisponible::query()->where('doctor_id', $doctorId)->where('estado', '1')->get();
         return response()->json($horarios);
     }
 

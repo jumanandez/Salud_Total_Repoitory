@@ -20,6 +20,8 @@ return new class extends Migration
             $table->date('fecha');
             $table->string('hora');
             $table->enum('estado', ['activo', 'pendiente', 'cancelado', 'atendido', 'desaprovechado'])->default('activo');
+            $table->string('motivo')->nullable();
+            $table->text('observaciones')->nullable();
             $table->boolean('solicita_reprogramacion')->default(false);
             $table->boolean('reprogramado')->default(false);
             $table->biginteger('reprogramado_por')->nullable();

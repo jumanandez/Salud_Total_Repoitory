@@ -7,7 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 class HorarioDisponible extends Model
 {
     protected $table = 'disponibilidades_doctores';
-
+    protected $primaryKey = 'disponibilidad_id';
     protected $casts = [
         'hora_inicio' => 'datetime:H:i',
         'hora_fin' => 'datetime:H:i',
