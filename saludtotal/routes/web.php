@@ -59,4 +59,9 @@ Route::middleware('auth')->group(function () {
 // También agregar una ruta sin middleware para la API
 Route::post('api/turnos', [TurnoController::class, 'store'])->name('api.turnos.store');
 
+// Rutas API para la aplicación de escritorio
+Route::prefix('api/desktop')->group(function () {
+    require __DIR__.'/api.php';
+});
+
 require __DIR__.'/auth.php';
