@@ -536,6 +536,153 @@ class TurnoController extends Controller
             ], 500);
         }
     }
+    /**
+     * Obtener todos los datos necesarios para el formulario de creación de turnos
+     */
+    public function datosFormulario(Request $request)
+    {
+        try {
+            // 1. Obtener todas las especialidades
+            $especialidades = DB::table('especialidades')
+                ->select('especialidad_id as id', 'nombre')
+                ->orderBy('nombre')
+                ->get();
 
+            // 2. Obtener doctores agrupados por especialidad
+            $doctoresPorEspecialidad = DB::table('doctores')
+                ->join('especialidades', 'doctores.especialidad', '=', 'especialidades.especialidad_id')
+                ->select(
+                    'doctores.doctor_id as id',
+                    'doctores.nombre_apellido as nombre_completo',
+                    'doctores.especialidad as especialidad_id',
+                    'especialidades.nombre as especialidad_nombre'
+                )
+                ->orderBy('especialidades.nombre')
+                ->orderBy('doctores.nombre_apellido')
+                ->get()
+                ->groupBy('especialidad_id');
 
+            // 3. Si se especifica doctor_id y fecha, obtener horarios disponibles
+            $horariosDisponibles = [];
+            if ($request->has('doctor_id') && $request->has('fecha')) {
+                $validated = $request->validate([
+                    'doctor_id' => 'required|exists:doctores,doctor_id',
+                    'fecha' => 'required|date_format:Y-m-d|after_or_equal:today',
+                ]);
+
+                $diaSemana = \Carbon\Carbon::parse($validated['fecha'])->dayOfWeekIso;
+
+                // CORREGIDO: Usar la tabla correcta disponibilidades_doctores
+                $infoHorario = DB::table('disponibilidades_doctores')
+                    ->where('doctor_id', $validated['doctor_id'])
+                    ->where('dia_semana', $diaSemana)
+                    ->where('activo', 1)
+                    ->first(['hora_inicio', 'hora_fin']);
+
+                if ($infoHorario) {
+                    // Obtener duración de consulta de la tabla tiempo_consulta
+                    $duracionSlot = DB::table('tiempo_consulta')
+                        ->where('doctor_id', $validated['doctor_id'])
+                        ->value('tiempo_minutos') ?? 30; // Default 30 minutos
+
+                    // Generar slots disponibles
+                    $horariosDisponibles = $this->generarHorariosDisponibles(
+                        $infoHorario->hora_inicio,
+                        $infoHorario->hora_fin,
+                        $validated['fecha'],
+                        $validated['doctor_id'],
+                        $duracionSlot
+                    );
+                }
+            }
+
+            // 4. Estructurar respuesta
+            $response = [
+                'especialidades' => $especialidades->toArray(),
+                'doctores_por_especialidad' => [],
+                'horarios_disponibles' => $horariosDisponibles
+            ];
+
+            // Convertir la agrupación a un array más manejable
+            foreach ($doctoresPorEspecialidad as $especialidadId => $doctores) {
+                $response['doctores_por_especialidad'][] = [
+                    'especialidad_id' => $especialidadId,
+                    'especialidad_nombre' => $doctores->first()->especialidad_nombre,
+                    'doctores' => $doctores->map(function ($doctor) {
+                        return [
+                            'id' => $doctor->id,
+                            'nombre_completo' => $doctor->nombre_completo
+                        ];
+                    })->toArray()
+                ];
+            }
+
+            return response()->json([
+                'success' => true,
+                'data' => $response
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Parámetros inválidos',
+                'message' => $e->getMessage(),
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Error al obtener datos del formulario',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
+    /**
+     * Generar horarios disponibles para un doctor en una fecha específica
+     */
+    private function generarHorariosDisponibles($horaInicio, $horaFin, $fecha, $doctorId, $duracionMinutos)
+    {
+        $horarios = [];
+        
+        try {
+            // Convertir las horas (pueden venir como "08:00" o "08:00:00")
+            $inicio = \Carbon\Carbon::createFromFormat('H:i', substr($horaInicio, 0, 5));
+            $fin = \Carbon\Carbon::createFromFormat('H:i', substr($horaFin, 0, 5));
+            
+            // Obtener turnos ya ocupados para esa fecha y doctor
+            $turnosOcupados = DB::table('turnos')
+                ->where('doctor_id', $doctorId)
+                ->where('fecha', $fecha)
+                ->where('estado', '!=', 'cancelado')
+                ->pluck('hora')
+                ->map(function($hora) {
+                    // Normalizar formato a H:i
+                    return substr($hora, 0, 5);
+                })
+                ->toArray();
+
+            while ($inicio->lessThan($fin)) {
+                $horaSlot = $inicio->format('H:i');
+                
+                // Verificar si el slot no está ocupado
+                if (!in_array($horaSlot, $turnosOcupados)) {
+                    $horarios[] = [
+                        'hora' => $horaSlot,
+                        'disponible' => true,
+                        'display' => $inicio->format('H:i')
+                    ];
+                }
+                
+                $inicio->addMinutes($duracionMinutos);
+            }
+            
+        } catch (\Exception $e) {
+            // En caso de error, devolver array vacío con log del error
+            \Log::error('Error generando horarios disponibles: ' . $e->getMessage());
+            return [];
+        }
+        
+        return $horarios;
+    }
 }

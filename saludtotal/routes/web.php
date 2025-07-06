@@ -23,6 +23,7 @@ Route::get('turnos', [TurnoController::class, 'index'])->name('turnos.index');
 Route::get('turnos/especialidad', [TurnoController::class, 'filterByEspecialidad'])->name('turnos.especialidad');
 Route::get('turnos/buscar', [TurnoController::class, 'buscarTurnos'])->name('turnos.buscar');
 Route::get('turnos/doctor/disponibles', [TurnoController::class, 'turnosDisponibles'])->name('turnos.disponibles');
+Route::get('api/turnos/datos-formulario', [TurnoController::class, 'datosFormulario'])->name('api.turnos.datos-formulario');
 
 
 Route::middleware('auth')->group(function () {
