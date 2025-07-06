@@ -37,8 +37,26 @@ class RegisteredUserController extends Controller
             'password' => ['required', 'confirmed', Rules\Password::defaults()],
         ],
         [
+            'nombre_apellido.required' => 'El campo nombre apellido es obligatorio.',
+            'nombre_apellido.string' => 'El campo nombre apellido debe ser una cadena de caracteres.',
+            'nombre_apellido.max' => 'El campo nombre apellido debe tener no mas de 255 caracteres.',
+            'dni.required' => 'El campo dni es obligatorio.',
+            'dni.string' => 'El campo dni debe ser una cadena de caracteres.',
+            'dni.max' => 'El campo dni debe tener no mas de 255 caracteres.',
+            'dni.unique' => 'El dni ingresado ya existe.',
             'dni.regex' => 'El DNI solo puede contener números.',
             'dni.digits_between' => 'El DNI no es válido.',
+            'email.required' => 'El campo email es obligatorio.',
+            'email.string' => 'El campo email debe ser una cadena de caracteres.',
+            'email.lowercase' => 'El campo email debe ser en minúsculas.',
+            'email.email' => 'El campo email debe ser una dirección de correo electrónico válida.',
+            'email.max' => 'El campo email debe tener no mas de 255 caracteres.',
+            'email.unique' => 'El email ingresado ya existe.',
+            'telefono.required' => 'El campo telefono es obligatorio.',
+            'telefono.string' => 'El campo telefono debe ser una cadena de caracteres.',
+            'telefono.max' => 'El campo telefono debe tener no mas de 255 caracteres.',
+            'password.required' => 'El campo password es obligatorio.',
+            'password.confirmed' => 'Las contraseñas no coinciden.',
         ]);
 
 

@@ -115,7 +115,7 @@ export const FormContent = () => {
                 setMensaje(resultado.mensaje); // mensaje de error general
             } else {
                 setMensaje(resultado.mensaje); // mensaje general de error
-                console.log('Error grande: ' + mensaje);
+                console.log('Error grande: ' + resultado.mensaje);
             }
         });
     };

@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Model;
 
 class Consulta extends Model
 {
+    protected $primaryKey = 'consulta_id';
     public $timestamps = false;
     protected $fillable = [
         'paciente_id',

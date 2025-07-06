@@ -38,7 +38,7 @@ class TurnoController extends Controller
     {
         $turnoValidado = $request->validated();
         $turnoNuevo = Turno::create([
-            'paciente_id' => Auth::user()->id,
+            'paciente_id' => Auth::user()->paciente_id,
             'doctor_id' => $turnoValidado['doctor_id'],
             'fecha' => $turnoValidado['fecha'],
             'hora' => $turnoValidado['hora'],
@@ -89,7 +89,7 @@ class TurnoController extends Controller
 
         $order = $request->get('orden', 'desc');
 
-        $turnos = Turno::where('paciente_id', $user->id)
+        $turnos = Turno::where('paciente_id', $user->paciente_id)
             ->when($request->estado, function ($query, $estado) {
                 return $query->where('estado', $estado);
             })
@@ -109,7 +109,7 @@ class TurnoController extends Controller
             'estado' => 'pendiente',
             'fecha_solicitud_cancelacion' => now(),
             'solicita_cancelacion' => true,
-            'cancelado_por' => Auth::user()->id,
+            'cancelado_por' => Auth::user()->paciente_id,
             'fecha_edicion' => now(),
             ]);
             $turno->save();
@@ -129,7 +129,7 @@ class TurnoController extends Controller
             $turno->update([
             'estado' => 'cancelado',
             'fecha_cancelacion' => now(),
-            'cancelado_por' => Auth::user()->id,
+            'cancelado_por' => Auth::user()->paciente_id,
             'fecha_edicion' => now(),
             ]);
         }catch(Exception $e){
@@ -154,7 +154,7 @@ class TurnoController extends Controller
                 'estado' => 'pendiente',
                 'fecha_solicitud_reprogramacion' => now(),
                 'solicita_reprogramacion' => true,
-                'reprogramado_por' => Auth::user()->id,
+                'reprogramado_por' => Auth::user()->paciente_id,
             ]);
         }catch(Exception $e){
             return response()->json(['mensaje' => $e->getMessage()]);
@@ -166,13 +166,14 @@ class TurnoController extends Controller
     public function reprogramar(Turno $turno)
     {
         try{
-            $turno->update([
-            'estado' => 'activo',
-            'reprogramado' => true,
-            'fecha_reprogramacion' => now(),
-            'reprogramado_por' => Auth::user()->id,
-            'fecha_edicion' => now(),
-            ]);
+            //USAR EL PACIENTE_ID DEL TURNO
+            // $turno->update([
+            // 'estado' => 'activo',
+            // 'reprogramado' => true,
+            // 'fecha_reprogramacion' => now(),
+            // 'reprogramado_por' => Auth::user()->paciente_id,
+            // 'fecha_edicion' => now(),
+            // ]);
         }catch(Exception $e){
             return response()->json(['mensaje' => $e->getMessage()]);
         }
