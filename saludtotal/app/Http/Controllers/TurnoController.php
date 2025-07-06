@@ -27,8 +27,68 @@ class TurnoController extends Controller
     }
     public function index()
     {
-        $turnos = Turno::all();
-        return response()->json($turnos);
+        try {
+            // Usar Query Builder con los nombres correctos de columnas (igual que en filterByEspecialidad)
+            $turnos = DB::table('turnos')
+                ->join('pacientes', 'turnos.paciente_id', '=', 'pacientes.id')
+                ->join('doctores', 'turnos.doctor_id', '=', 'doctores.doctor_id')
+                ->join('especialidades', 'doctores.especialidad', '=', 'especialidades.especialidad_id')
+                ->select(
+                    'turnos.turno_id as id',
+                    'turnos.paciente_id',
+                    'turnos.doctor_id',
+                    'turnos.fecha',
+                    'turnos.hora',
+                    'turnos.estado',
+                    'pacientes.id as paciente_id',
+                    'pacientes.nombre_apellido as paciente_nombre_apellido',
+                    'pacientes.email as paciente_email',
+                    'doctores.doctor_id',
+                    'doctores.nombre_apellido as doctor_nombre_apellido',
+                    'especialidades.especialidad_id',
+                    'especialidades.nombre as especialidad_nombre'
+                )
+                ->get();
+
+            // Transformar a la estructura esperada (igual que en filterByEspecialidad)
+            $turnosTransformados = $turnos->map(function ($turno) {
+                return [
+                    'id' => $turno->id,
+                    'paciente_id' => $turno->paciente_id,
+                    'doctor_id' => $turno->doctor_id,
+                    'fecha' => $turno->fecha,
+                    'hora' => $turno->hora,
+                    'estado' => $turno->estado,
+                    'paciente' => [
+                        'id' => $turno->paciente_id,
+                        'name' => $turno->paciente_nombre_apellido,
+                        'email' => $turno->paciente_email,
+                    ],
+                    'doctor' => [
+                        'doctor_id' => $turno->doctor_id,
+                        'nombre_apellido' => $turno->doctor_nombre_apellido,
+                        'especialidad' => [
+                            'especialidad_id' => $turno->especialidad_id,
+                            'nombre' => $turno->especialidad_nombre
+                        ]
+                    ]
+                ];
+            });
+
+            return response()->json($turnosTransformados);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Datos de entrada inválidos',
+                'message' => $e->getMessage(),
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al filtrar turnos por especialidad',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
     /**
@@ -178,6 +238,79 @@ class TurnoController extends Controller
         }
 
         return response()->json(['mensaje' => 'Reprogramación enviada correctamente.']);
+    }
+    /**
+     * Filtrar turnos por especialidad
+     */
+    public function filterByEspecialidad(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'especialidad_id' => 'required|integer|exists:especialidades,especialidad_id',
+            ]);
+
+            // Usar Query Builder con los nombres correctos de columnas
+            $turnos = DB::table('turnos')
+                ->join('pacientes', 'turnos.paciente_id', '=', 'pacientes.id')
+                ->join('doctores', 'turnos.doctor_id', '=', 'doctores.doctor_id')
+                ->join('especialidades', 'doctores.especialidad', '=', 'especialidades.especialidad_id')
+                ->where('especialidades.especialidad_id', $validated['especialidad_id'])
+                ->select(
+                    'turnos.turno_id as id',  // Usar turno_id como id
+                    'turnos.paciente_id',
+                    'turnos.doctor_id',
+                    'turnos.fecha',
+                    'turnos.hora',
+                    'turnos.estado',
+                    'pacientes.id as paciente_id',
+                    'pacientes.nombre_apellido as paciente_nombre_apellido',  // Campo correcto
+                    'pacientes.email as paciente_email',
+                    'doctores.doctor_id',
+                    'doctores.nombre_apellido as doctor_nombre_apellido',
+                    'especialidades.especialidad_id',
+                    'especialidades.nombre as especialidad_nombre'
+                )
+                ->get();
+
+            // Transformar a la estructura esperada
+            $turnosTransformados = $turnos->map(function ($turno) {
+                return [
+                    'id' => $turno->id,
+                    'paciente_id' => $turno->paciente_id,
+                    'doctor_id' => $turno->doctor_id,
+                    'fecha' => $turno->fecha,
+                    'hora' => $turno->hora,
+                    'estado' => $turno->estado,
+                    'paciente' => [
+                        'id' => $turno->paciente_id,
+                        'name' => $turno->paciente_nombre_apellido,  // Usar el campo correcto
+                        'email' => $turno->paciente_email,
+                    ],
+                    'doctor' => [
+                        'doctor_id' => $turno->doctor_id,
+                        'nombre_apellido' => $turno->doctor_nombre_apellido,
+                        'especialidad' => [
+                            'especialidad_id' => $turno->especialidad_id,
+                            'nombre' => $turno->especialidad_nombre
+                        ]
+                    ]
+                ];
+            });
+
+            return response()->json($turnosTransformados);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Datos de entrada inválidos',
+                'message' => $e->getMessage(),
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al filtrar turnos por especialidad',
+                'message' => $e->getMessage()
+            ], 500);
+        }
     }
 
 

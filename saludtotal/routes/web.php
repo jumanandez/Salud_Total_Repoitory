@@ -20,6 +20,7 @@ Route::get('profesionales/doctores', [ProfesionalesController::class, 'doctores'
 Route::get('profesionales/{doctor_id}/horarios', [ProfesionalesController::class, 'horarios'])->name('profesionales.horarios');
 Route::get('profesionales/doctor/{doctor_id}', [ProfesionalesController::class, 'nombreDoctorById'])->name('profesional.nombre');
 Route::get('turnos', [TurnoController::class, 'index'])->name('turnos.index');
+Route::get('turnos/especialidad', [TurnoController::class, 'filterByEspecialidad'])->name('turnos.especialidad');
 Route::get('turnos/doctor/disponibles', [TurnoController::class, 'turnosDisponibles'])->name('turnos.disponibles');
 
 
