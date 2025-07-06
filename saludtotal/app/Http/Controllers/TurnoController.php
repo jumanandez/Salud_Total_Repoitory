@@ -313,5 +313,109 @@ class TurnoController extends Controller
         }
     }
 
+    /**
+     * Buscar turnos por campo específico
+     */
+    public function buscarTurnos(Request $request)
+    {
+        try {
+            $validated = $request->validate([
+                'campo' => 'required|string|in:doctor,paciente,especialidad,estado,fecha',
+                'valor' => 'required|string',
+            ]);
+
+            $campo = $validated['campo'];
+            $valor = $validated['valor'];
+
+            // Query base con todas las relaciones
+            $query = DB::table('turnos')
+                ->join('pacientes', 'turnos.paciente_id', '=', 'pacientes.id')
+                ->join('doctores', 'turnos.doctor_id', '=', 'doctores.doctor_id')
+                ->join('especialidades', 'doctores.especialidad', '=', 'especialidades.especialidad_id');
+
+            // Aplicar filtro según el campo seleccionado
+            switch ($campo) {
+                case 'doctor':
+                    $query->where('doctores.nombre_apellido', 'LIKE', "%{$valor}%");
+                    break;
+                case 'paciente':
+                    $query->where('pacientes.nombre_apellido', 'LIKE', "%{$valor}%");
+                    break;
+                case 'especialidad':
+                    $query->where('especialidades.nombre', 'LIKE', "%{$valor}%");
+                    break;
+                case 'estado':
+                    $query->where('turnos.estado', 'LIKE', "%{$valor}%");
+                    break;
+                case 'fecha':
+                    $query->where('turnos.fecha', 'LIKE', "%{$valor}%");
+                    break;
+            }
+
+            // Seleccionar campos y ejecutar query
+            $turnos = $query->select(
+                'turnos.turno_id as id',
+                'turnos.paciente_id',
+                'turnos.doctor_id',
+                'turnos.fecha',
+                'turnos.hora',
+                'turnos.estado',
+                'pacientes.id as paciente_id',
+                'pacientes.nombre_apellido as paciente_nombre_apellido',
+                'pacientes.email as paciente_email',
+                'doctores.doctor_id',
+                'doctores.nombre_apellido as doctor_nombre_apellido',
+                'especialidades.especialidad_id',
+                'especialidades.nombre as especialidad_nombre'
+            )->get();
+
+            // Transformar a la estructura esperada
+            $turnosTransformados = $turnos->map(function ($turno) {
+                return [
+                    'id' => $turno->id,
+                    'paciente_id' => $turno->paciente_id,
+                    'doctor_id' => $turno->doctor_id,
+                    'fecha' => $turno->fecha,
+                    'hora' => $turno->hora,
+                    'estado' => $turno->estado,
+                    'paciente' => [
+                        'id' => $turno->paciente_id,
+                        'name' => $turno->paciente_nombre_apellido,
+                        'email' => $turno->paciente_email,
+                    ],
+                    'doctor' => [
+                        'doctor_id' => $turno->doctor_id,
+                        'nombre_apellido' => $turno->doctor_nombre_apellido,
+                        'especialidad' => [
+                            'especialidad_id' => $turno->especialidad_id,
+                            'nombre' => $turno->especialidad_nombre
+                        ]
+                    ]
+                ];
+            });
+
+            return response()->json([
+                'data' => $turnosTransformados,
+                'filtro_aplicado' => [
+                    'campo' => $campo,
+                    'valor' => $valor,
+                    'resultados' => $turnosTransformados->count()
+                ]
+            ]);
+
+        } catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'error' => 'Parámetros de búsqueda inválidos',
+                'message' => $e->getMessage(),
+                'errors' => $e->errors()
+            ], 422);
+        } catch (\Exception $e) {
+            return response()->json([
+                'error' => 'Error al realizar la búsqueda',
+                'message' => $e->getMessage()
+            ], 500);
+        }
+    }
+
 
 }
