@@ -7,7 +7,11 @@ export const cargarDoctores = async (especialidadId = null) => {
         }
         const response = await fetch(url);
         const data = await response.json();
-        return data;
+        if(data.doctores)
+        return data.doctores;
+
+        if(data.doctores_by_especialidad)
+            return data.doctores_by_especialidad;
     } catch (error) {
         console.error('Error fetching doctores:', error);
     }

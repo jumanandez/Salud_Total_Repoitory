@@ -15,6 +15,7 @@ export async function pedirTurno(e, doctor, fecha, hora, csrfToken) {
         fecha: fechaFormateada,
         hora: hora,
     };
+    console.log(datos);
     try {
         const response = await fetch('/turnos/store', {
             method: 'POST',
@@ -41,7 +42,7 @@ export async function pedirTurno(e, doctor, fecha, hora, csrfToken) {
                 return {
                     exito: false,
                     error: true,
-                    mensaje: data.detalle || 'Error del servidor',
+                    mensaje: data.message || 'Error del servidor',
                     codigo: response.status
                 };
             }
@@ -50,7 +51,7 @@ export async function pedirTurno(e, doctor, fecha, hora, csrfToken) {
         return {
             exito: true,
             error: false,
-            datos: data,
+            datos: data.Turno,
             mensaje: data.mensaje || 'Turno creado exitosamente'
         };
     } catch (err) {
@@ -58,7 +59,7 @@ export async function pedirTurno(e, doctor, fecha, hora, csrfToken) {
         return {
             exito: false,
             error: true,
-            mensaje: 'Error de conexión. Verifica tu conexión a internet.',
+            mensaje: err.message || 'Error de conexión. Verifica tu conexión a internet.',
             errorOriginal: err
         };
     }

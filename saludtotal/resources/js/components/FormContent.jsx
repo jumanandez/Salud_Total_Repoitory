@@ -6,7 +6,7 @@ import { cargarDoctores } from "../services/cargarDoctores.js";
 import { InputSelect } from "./FormInputs.jsx";
 import DatePicker from "react-datepicker";
 import "react-datepicker/dist/react-datepicker.css";
-import { getDay } from "date-fns";
+import { getDay, set } from "date-fns";
 import { registerLocale, setDefaultLocale } from "react-datepicker";
 import { es } from "date-fns/locale/es";
 import cargarTurnosDisponibles from "../services/cargarTurnosDisponibles.js";
@@ -26,7 +26,10 @@ export const FormContent = () => {
     useEffect(() => {
         const fetchEspecialidades = async () => {
             const especialidades = await cargarEspecialidades();
+
             setEspecialidades(especialidades);
+            console.log(especialidades);
+
         };
         fetchEspecialidades();
 
@@ -81,7 +84,6 @@ export const FormContent = () => {
         return diasLaborales.some((dia) => dia.dia_num === day && dia.hora_inicio !== null);
     };
 
-
     //Handle al enviar el formulario
     const openModal = () => {
         setIsModalOpen(true);
@@ -96,28 +98,37 @@ export const FormContent = () => {
     const [modalInfo, setModalInfo] = useState(null);
     const [errores, setErrores] = useState([]);
     const [mensaje, setMensaje] = useState("");
+    const [cargando, setCargando] = useState(false);
     const handleFormSubmit = async (event) => {
+
+        setCargando(true);
         const csrfToken = document.querySelector('meta[name="csrf-token"]')?.getAttribute("content");
+        const paciente = document.getElementById('form-pedir-turno').dataset['pacienteId'];
+        console.log(paciente);
         const resultado = await pedirTurno(
             event,
             doctorSeleccionado,
             fecha,
             horaSeleccionada,
             csrfToken
-        ).then((resultado)=> {
-            if (resultado.exito) {
-                setModalInfo(resultado.datos); // para mostrar en el modal
-                setMensaje(resultado.mensaje); // mensaje de éxito
-                openModal();
-            } else if (resultado.errores) {
-                console.log(resultado.errores);
-                setErrores(resultado.errores); // errores por campo
-                setMensaje(resultado.mensaje); // mensaje de error general
-            } else {
-                setMensaje(resultado.mensaje); // mensaje general de error
-                console.log('Error grande: ' + resultado.mensaje);
-            }
-        });
+        );
+
+        if (resultado.exito) {
+            console.log(resultado)
+            setModalInfo(resultado.datos); // para mostrar en el modal
+            setMensaje(resultado.mensaje); // mensaje de éxito
+            openModal();
+        } else if (resultado.errores) {
+            console.log(resultado.errores);
+            setErrores(resultado.errores); // errores por campo
+            setMensaje(resultado.mensaje); // mensaje de error general
+        } else {
+            setMensaje(resultado.mensaje); // mensaje general de error
+            console.log('Error grande: ' + resultado.mensaje);
+        }
+        setCargando(false);  // Resetea el estado de cargando al finalizar la petición
+        //cargando
+
     };
 
 
@@ -233,7 +244,7 @@ export const FormContent = () => {
                         <button className="bg-green-500 hover:bg-green-dark text-gray-900 font-semibold py-2 px-4 border rounded-full"
                             onClick={handleFormSubmit}
                         >
-                            Pedir Turno
+                            {cargando ? 'enviando...' : 'Pedir Turno' }
                         </button>
                     </div>
                 </div>

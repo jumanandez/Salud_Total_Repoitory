@@ -28,10 +28,10 @@ Route::prefix('turnos')->group(function () {
     Route::post('/', [ApiTurnoController::class, 'crearTurno']);
     Route::get('/especialidades', [ApiTurnoController::class, 'especialidadesWithDoctores']);
     Route::get('/disponibles', [TurnoController::class, 'turnosDisponibles']);
-
 });
 
 // Rutas para profesionales (reutilizando el controlador existente)
+// seria api/desktop/profesionales
 Route::prefix('profesionales')->group(function () {
     Route::get('/especialidades', [ProfesionalesController::class, 'especialidades']);
     Route::get('/especialidades/{especialidad_id}/doctores', [ProfesionalesController::class, 'doctoresByEspecialidad']);

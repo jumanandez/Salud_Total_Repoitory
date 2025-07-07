@@ -16,7 +16,7 @@ class ProfesionalesController extends Controller
     public function especialidades()
     {
         $especialidades = Especialidad::all();
-        return response()->json($especialidades);
+        return response()->json(['especialidades' => $especialidades]);
     }
     public function doctoresByEspecialidad($especialidadId)
     {
@@ -25,13 +25,13 @@ class ProfesionalesController extends Controller
         }catch(Exception $e){
             return response()->json(['mensaje' => $e->getMessage()]);
         }
-        return response()->json($doctores);
+        return response()->json(['doctores_by_especialidad' => $doctores]);
     }
 
     public function doctores()
     {
         $doctor = Doctor::all();
-        return response()->json($doctor);
+        return response()->json(['doctores' => $doctor]);
     }
 
     public function nombreDoctorById($id)
@@ -43,7 +43,7 @@ class ProfesionalesController extends Controller
     public function horarios($doctorId)
     {
         $horarios = HorarioDisponible::query()->where('doctor_id', $doctorId)->where('estado', '1')->get();
-        return response()->json($horarios);
+        return response()->json(['horarios_laborales' =>$horarios]);
     }
 
 }

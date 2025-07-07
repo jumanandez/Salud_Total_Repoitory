@@ -6,7 +6,7 @@
                 <h1>Pedir Turno</h1>
             </header>
             <main class="p-3">
-                <form class="w-full">
+                <form id="form-pedir-turno" data-pacienteId="{{ json_encode(auth()->user()->paciente_id) }}" class="w-full">
                     <meta name="csrf-token" content="{{ csrf_token() }}">
                     <section id="form-pedir-turno">
 

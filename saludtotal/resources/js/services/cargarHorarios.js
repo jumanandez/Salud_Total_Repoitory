@@ -5,7 +5,8 @@ export const cargarHorarios = async (doctor_id) => {
     if (!response.ok) {
         throw new Error('Error al cargar los horarios');
     }
-    const horarios = await response.json();
+    const data = await response.json();
+    const horarios = data.horarios_laborales;
     const dias_semana = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
 
 

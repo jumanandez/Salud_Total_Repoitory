@@ -26,6 +26,7 @@ class StoreTurnoRequest extends FormRequest
     {
         $request = $this->request;
         return [
+            'paciente_id' => 'bail|sometimes|exists:pacientes,paciente_id',
             'doctor_id' => 'bail|required|exists:doctores,doctor_id',
             'fecha' => ['bail','required',
                         'date',
@@ -40,6 +41,7 @@ class StoreTurnoRequest extends FormRequest
     public function messages(): array
     {
         return [
+            'paciente_id.exists' => 'El paciente seleccionado no existe.',
             'doctor_id.required' => 'El campo doctor es obligatorio.',
             'doctor_id.exists' => 'El doctor seleccionado no existe.',
             'fecha.required' => 'El campo fecha es obligatorio.',

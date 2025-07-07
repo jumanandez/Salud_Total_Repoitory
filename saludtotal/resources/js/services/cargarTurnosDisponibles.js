@@ -20,10 +20,12 @@ export default async function cargarTurnosDisponibles(doctorId, fecha) {
 
         return {error: mensaje};
     }
-    slots = await response.json();
+    const data = await response.json();
+
+    slots = data.slots;
     } catch (error) {
         console.error("Error al cargar los slots disponibles:", error.message);
         return {error: 'Error al cargar los slots disponibles'};
     }
-    return {data: slots};
+    return {data: slots}
 }

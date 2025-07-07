@@ -16,6 +16,7 @@ export const DetalleDoctor = ({id, fecha, hora}) => {
     }, []);
 
     const formatearFecha = (fechaStr) => {
+        console.log(fechaStr);
         const fecha = new Date(fechaStr.replace(/\//g, '-'));
         return format(fecha, "dd 'de' MMMM 'de' yyyy", { locale: es });
     };
