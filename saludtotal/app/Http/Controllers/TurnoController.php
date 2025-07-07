@@ -16,6 +16,7 @@ use App\Models\solicitudReprogramacion;
 use App\Http\Requests\StoreSolicitudReprogramacionRequest;
 use App\Mail\NotificacionTurno;
 use Illuminate\Support\Facades\Mail;
+use App\Models\User;
 class TurnoController extends Controller
 {
 
@@ -67,33 +68,17 @@ class TurnoController extends Controller
      */
     public function store(StoreTurnoRequest $request)
     {
+        $user = Auth::user();
         try{
             $turnoValidado = $request->validated();
-            $paciente_id = '';
-            if(Auth::user()->paciente_id != null)
-            {
-                $paciente_id = Auth::user()->paciente_id;
-            }
-            else {
-                $paciente_id = $turnoValidado['paciente_id'];
-            }
-
             $turnoNuevo = Turno::create([
-                'paciente_id' => $paciente_id,
+                'paciente_id' => $user->paciente_id,
                 'doctor_id' => $turnoValidado['doctor_id'],
                 'fecha' => $turnoValidado['fecha'],
                 'hora' => $turnoValidado['hora'],
                 'estado' => 'activo'
             ]);
             $turnoNuevo->save();
-
-            Mail::to(Auth::user()->email)->send(new NotificacionTurno(
-                Auth::user()->nombre_apellido,
-                $turnoNuevo['doctor_id'],
-                $turnoNuevo->turno_id,
-                $turnoNuevo['fecha'],
-                $turnoNuevo['hora'],
-            ));
         }
         catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([

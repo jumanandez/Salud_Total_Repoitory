@@ -17,7 +17,7 @@ export async function pedirTurno(e, doctor, fecha, hora, csrfToken) {
     };
     console.log(datos);
     try {
-        const response = await fetch('/turnos/store', {
+        const response = await fetch('/turnos/solicitar-turno', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json',

@@ -25,16 +25,14 @@ Route::get('profesionales/doctor/{doctor_id}', [ProfesionalesController::class, 
 Route::get('turnos', [TurnoController::class, 'index'])->name('turnos.index');
 Route::get('turnos/especialidad', [TurnoController::class, 'filterByEspecialidad'])->name('turnos.especialidad');
 Route::get('turnos/doctor/disponibles', [TurnoController::class, 'turnosDisponibles'])->name('turnos.disponibles');
-Route::get('api/turnos/datos-formulario', [TurnoController::class, 'datosFormulario'])->name('api.turnos.datos-formulario');
+// Route::get('api/turnos/datos-formulario', [TurnoController::class, 'datosFormulario'])->name('api.turnos.datos-formulario');
 
 Route::post('/consulta/store', [ConsultaController::class, 'store'])->name('consulta.store');
 Route::middleware('auth')->group(function () {
     Route::get('turnos/create', [TurnoController::class, 'create'])->name('turnos.create');
-    Route::post('turnos/store', [TurnoController::class, 'store'])->name('turnos.store');
     Route::post('turnos/store-desktop', [TurnoController::class, 'storeDesktop'])->name('turnos.store.desktop');
-
     Route::get('/turnos/mis-turnos', [TurnoController::class, 'misTurnos'])->name('mis-turnos');
-
+    Route::post('turnos/solicitar-turno', [TurnoController::class, 'store'])->name('turnos.store');
     Route::get('turnos/mis-turnos/{turno_id}',
         [TurnoController::class, 'turnoDetails'])->name('turnos.details');
 
@@ -55,14 +53,6 @@ Route::middleware('auth')->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
-});
-
-// También agregar una ruta sin middleware para la API
-Route::post('api/turnos', [TurnoController::class, 'store'])->name('api.turnos.store');
-
-// Rutas API para la aplicación de escritorio
-Route::prefix('api/desktop')->group(function () {
-    require __DIR__.'/api.php';
 });
 
 require __DIR__.'/auth.php';
