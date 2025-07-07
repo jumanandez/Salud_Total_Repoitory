@@ -69,8 +69,17 @@ class TurnoController extends Controller
     {
         try{
             $turnoValidado = $request->validated();
+            $paciente_id = '';
+            if(Auth::user()->paciente_id != null)
+            {
+                $paciente_id = Auth::user()->paciente_id;
+            }
+            else {
+                $paciente_id = $turnoValidado['paciente_id'];
+            }
+
             $turnoNuevo = Turno::create([
-                'paciente_id' => $turnoValidado['paciente_id'] ?? Auth::user()->paciente_id,
+                'paciente_id' => $paciente_id,
                 'doctor_id' => $turnoValidado['doctor_id'],
                 'fecha' => $turnoValidado['fecha'],
                 'hora' => $turnoValidado['hora'],
@@ -85,7 +94,7 @@ class TurnoController extends Controller
                 $turnoNuevo['fecha'],
                 $turnoNuevo['hora'],
             ));
-
+        }
         catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
                 'mensaje' => $e->getMessage(),
