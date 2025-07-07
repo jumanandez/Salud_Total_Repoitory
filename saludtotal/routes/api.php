@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\ApiTurnoController;
+use App\Http\Controllers\TurnoController;
 use App\Http\Controllers\ProfesionalesController;
 use Illuminate\Support\Facades\Route;
 
@@ -25,6 +26,9 @@ Route::prefix('pacientes')->group(function () {
 // Rutas para manejo de turnos
 Route::prefix('turnos')->group(function () {
     Route::post('/', [ApiTurnoController::class, 'crearTurno']);
+    Route::get('/especialidades', [ApiTurnoController::class, 'especialidadesWithDoctores']);
+    Route::get('/disponibles', [TurnoController::class, 'turnosDisponibles']);
+
 });
 
 // Rutas para profesionales (reutilizando el controlador existente)

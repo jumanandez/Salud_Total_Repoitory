@@ -12,36 +12,23 @@ class ApiTurnoController extends Controller
 {
     /**
      * Buscar pacientes existentes
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function buscarPacientes(Request $request)
     {
-        try {
-            $request->validate([
-                'busqueda' => 'required|string|min:2',
-            ]);
+        $request->validate([
+            'busqueda' => 'required|string|min:2',
+        ]);
 
-            $busqueda = $request->input('busqueda');
-            
-            // Buscar pacientes por nombre, apellido, email o DNI
-            $pacientes = DB::table('pacientes')
-                ->where(function($query) use ($busqueda) {
-                    $query->where('nombre_apellido', 'like', "%{$busqueda}%")
-                          ->orWhere('email', 'like', "%{$busqueda}%")
-                          ->orWhere('dni', 'like', "%{$busqueda}%");
-                })
-                ->select('id', 'nombre_apellido', 'email', 'telefono', 'dni')
-                ->limit(50) // Limitar resultados para mejor performance
-                ->get();
-
-            return response()->json([
-                'success' => true,
-                'data' => $pacientes,
-                'total' => $pacientes->count()
-            ]);
-
+        $busqueda = $request->input('busqueda');
+        try{
+            $users = User::where('nombre_apellido', 'like', "%{$busqueda}%")
+            ->orWhere('dni', 'like', "%{$busqueda}%")->get();
+        if($users->count() == 0){
+            return response()->json(['mensaje' => 'No hay usuarios coincidentes']);
+        }
         } catch (ValidationException $e) {
             return response()->json([
                 'success' => false,
@@ -55,18 +42,23 @@ class ApiTurnoController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+        return response()->json([
+                'success' => true,
+                'data' => $users,
+                'total' => $users->count()
+            ]);
     }
 
     /**
      * Obtener todos los pacientes
-     * 
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function listarPacientes()
     {
         try {
             $pacientes = DB::table('pacientes')
-                ->select('id', 'nombre_apellido', 'email', 'telefono', 'dni')
+                ->select('paciente_id', 'nombre_apellido', 'email', 'telefono', 'dni')
                 ->orderBy('nombre_apellido')
                 ->get();
 
@@ -87,7 +79,7 @@ class ApiTurnoController extends Controller
 
     /**
      * Crear un turno para un paciente existente
-     * 
+     *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
@@ -106,7 +98,7 @@ class ApiTurnoController extends Controller
 
             // 1. Verificar que el paciente existe
             $paciente = DB::table('pacientes')
-                ->where('id', $validated['paciente_id'])
+                ->where('paciente_id', $validated['paciente_id'])
                 ->first();
 
             if (!$paciente) {
@@ -177,14 +169,14 @@ class ApiTurnoController extends Controller
 
             // 6. Transformar a la estructura esperada
             $turnoTransformado = [
-                'id' => $turnoCompleto->id,
+                'turno_id' => $turnoCompleto->turno_id,
                 'paciente_id' => $turnoCompleto->paciente_id,
                 'doctor_id' => $turnoCompleto->doctor_id,
                 'fecha' => $turnoCompleto->fecha,
                 'hora' => $turnoCompleto->hora,
                 'estado' => $turnoCompleto->estado,
                 'paciente' => [
-                    'id' => $turnoCompleto->paciente_id,
+                    'paciente_id' => $turnoCompleto->paciente_id,
                     'nombre_apellido' => $turnoCompleto->paciente_nombre_apellido,
                     'email' => $turnoCompleto->paciente_email,
                     'telefono' => $turnoCompleto->paciente_telefono,
@@ -225,7 +217,7 @@ class ApiTurnoController extends Controller
 
     /**
      * Obtener información del paciente por ID
-     * 
+     *
      * @param int $id
      * @return \Illuminate\Http\JsonResponse
      */
@@ -233,8 +225,8 @@ class ApiTurnoController extends Controller
     {
         try {
             $paciente = DB::table('pacientes')
-                ->where('id', $id)
-                ->select('id', 'nombre_apellido', 'email', 'telefono', 'dni')
+                ->where('paciente_id', $id)
+                ->select('paciente_id', 'nombre_apellido', 'email', 'telefono', 'dni')
                 ->first();
 
             if (!$paciente) {
@@ -256,5 +248,11 @@ class ApiTurnoController extends Controller
                 'message' => $e->getMessage()
             ], 500);
         }
+    }
+
+    public function especialidadesWithDoctores(Request $request)
+    {
+        $especialidades = Especialidad::with('doctores')->get();
+        return response()->json(['data' => $especialidades]);
     }
 }

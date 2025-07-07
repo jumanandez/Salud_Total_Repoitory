@@ -27,76 +27,46 @@ class TurnoController extends Controller
     {
         return view('turnos.create');
     }
-    public function index()
+    public function index(Request $request)
     {
-        try {
-            // Usar Query Builder con los nombres correctos de columnas (igual que en filterByEspecialidad)
-            $turnos = DB::table('turnos')
-                ->join('pacientes', 'turnos.paciente_id', '=', 'pacientes.id')
-                ->join('doctores', 'turnos.doctor_id', '=', 'doctores.doctor_id')
-                ->join('especialidades', 'doctores.especialidad', '=', 'especialidades.especialidad_id')
-                ->select(
-                    'turnos.turno_id as id',
-                    'turnos.paciente_id',
-                    'turnos.doctor_id',
-                    'turnos.fecha',
-                    'turnos.hora',
-                    'turnos.estado',
-                    'pacientes.id as paciente_id',
-                    'pacientes.nombre_apellido as paciente_nombre_apellido',
-                    'pacientes.email as paciente_email',
-                    'doctores.doctor_id',
-                    'doctores.nombre_apellido as doctor_nombre_apellido',
-                    'especialidades.especialidad_id',
-                    'especialidades.nombre as especialidad_nombre'
-                )
-                ->get();
+        $query = Turno::with(['paciente', 'doctor', 'especialidad']);
 
-            // Transformar a la estructura esperada (igual que en filterByEspecialidad)
-            $turnosTransformados = $turnos->map(function ($turno) {
-                return [
-                    'id' => $turno->id,
-                    'paciente_id' => $turno->paciente_id,
-                    'doctor_id' => $turno->doctor_id,
-                    'fecha' => $turno->fecha,
-                    'hora' => $turno->hora,
-                    'estado' => $turno->estado,
-                    'paciente' => [
-                        'id' => $turno->paciente_id,
-                        'name' => $turno->paciente_nombre_apellido,
-                        'email' => $turno->paciente_email,
-                    ],
-                    'doctor' => [
-                        'doctor_id' => $turno->doctor_id,
-                        'nombre_apellido' => $turno->doctor_nombre_apellido,
-                        'especialidad' => [
-                            'especialidad_id' => $turno->especialidad_id,
-                            'nombre' => $turno->especialidad_nombre
-                        ]
-                    ]
-                ];
+        // Filtro por doctor
+        if ($request->filled('doctor')) {
+            $query->whereHas('doctor', function ($q) use ($request) {
+                $q->where('nombre_apellido', 'like', '%' . $request->doctor . '%');
             });
-
-            return response()->json($turnosTransformados);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'error' => 'Datos de entrada inválidos',
-                'message' => $e->getMessage(),
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Error al filtrar turnos por especialidad',
-                'message' => $e->getMessage()
-            ], 500);
         }
+
+        // Filtro por paciente
+        if ($request->filled('paciente')) {
+            $query->whereHas('paciente', function ($q) use ($request) {
+                $q->where('nombre_apellido', 'like', '%' . $request->paciente . '%');
+            });
+        }
+
+        // Filtro por fecha
+        if ($request->filled('fecha')) {
+            $query->where('fecha', $request->fecha);
+        }
+
+        // Filtro por especialidad
+        if ($request->filled('especialidad') && $request->especialidad !== 'todos') {
+            $query->whereHas('especialidad', function ($q) use ($request) {
+                $q->where('nombre', $request->especialidad);
+            });
+        }
+
+        $turnos = $query->get();
+
+        return response()->json($turnos);
     }
 
     /**
      * Store a newly created resource in storage.
      */
-    public function store(StoreTurnoRequest $request){
+    public function store(StoreTurnoRequest $request)
+    {
                 $turnoValidado = $request->validated();
         $turnoNuevo = Turno::create([
             'paciente_id' => Auth::user()->paciente_id,
@@ -128,7 +98,7 @@ class TurnoController extends Controller
                 'paciente_nombre_apellido' => 'required|string|max:255',
                 'paciente_telefono' => 'nullable|string|max:20',
                 'paciente_email' => 'required|email|max:255',
-                
+
                 // Datos del turno
                 'doctor_id' => 'required|integer|exists:doctores,doctor_id',
                 'fecha' => 'required|date|after_or_equal:today',
@@ -181,9 +151,9 @@ class TurnoController extends Controller
 
             // 5. Obtener el turno completo con todas las relaciones
             $turnoCompleto = DB::table('turnos')
-                ->join('pacientes', 'turnos.paciente_id', '=', 'pacientes.id')
+                ->join('pacientes', 'turnos.paciente_id', '=', 'pacientes.paciente_id')
                 ->join('doctores', 'turnos.doctor_id', '=', 'doctores.doctor_id')
-                ->join('especialidades', 'doctores.especialidad', '=', 'especialidades.especialidad_id')
+                ->join('especialidades', 'doctores.especialidad_id', '=', 'especialidades.especialidad_id')
                 ->where('turnos.turno_id', $turnoId)
                 ->select(
                     'turnos.turno_id as id',
@@ -192,7 +162,7 @@ class TurnoController extends Controller
                     'turnos.fecha',
                     'turnos.hora',
                     'turnos.estado',
-                    'pacientes.id as paciente_id',
+                    'pacientes.paciente_id',
                     'pacientes.nombre_apellido as paciente_nombre_apellido',
                     'pacientes.email as paciente_email',
                     'pacientes.telefono as paciente_telefono',
@@ -252,34 +222,43 @@ class TurnoController extends Controller
             ], 500);
         }
     }
-    public function turnosDisponibles(Request $request)
+        public function turnosDisponibles(Request $request)
     {
+        try {
+            $validated = $request->validate([
+                'doctor_id' => 'required|exists:doctores,doctor_id',
+                'fecha' => ['required','date_format:Y-m-d','after_or_equal:today', new FechaDisponible($request['doctor_id'])],
+            ],
+            [
+                'fecha.after_or_equal' => 'La fecha debe ser hoy o una fecha futura.',
+            ]);
 
-        $validated = $request->validate([
-            'doctor_id' => 'required|exists:doctores,doctor_id',
-            'fecha' => ['required','date_format:Y-m-d','after_or_equal:today', new FechaDisponible($request['doctor_id'])],
-        ],
-        [
-            'fecha.after_or_equal' => 'La fecha debe ser hoy o una fecha futura.',
-        ]);
+            $diaSemana = Carbon::parse($validated['fecha'], 'America/Argentina/Buenos_Aires')->dayOfWeekIso;
 
-        $diaSemana = Carbon::parse($validated['fecha'], 'America/Argentina/Buenos_Aires')->dayOfWeekIso;
+            $infoHorario = HorarioDisponible::where('doctor_id', $validated['doctor_id'])
+                ->where('dia_semana', $diaSemana)
+                ->first(['hora_inicio','hora_fin']);
 
-        $infoHorario = HorarioDisponible::where('doctor_id', $validated['doctor_id'])
-            ->where('dia_semana', $diaSemana)
-            ->first(['hora_inicio','hora_fin']);
+            $duracion_slot = DB::table('tiempo_consulta')->where('doctor_id', $validated['doctor_id'])
+                ->value('tiempo_minutos');
 
-        $duracion_slot = DB::table('tiempo_consulta')->where('doctor_id', $validated['doctor_id'])
-            ->value('tiempo_minutos');
-
-        $slots = ListarHorariosDisponibles::listarHorariosDisponibles(
-            $infoHorario['hora_inicio'],
-            $infoHorario['hora_fin'],
-            $validated['fecha'],
-            $validated['doctor_id'],
-            $duracion_slot
-        );
-        return response()->json($slots);
+            $slots = ListarHorariosDisponibles::listarHorariosDisponibles(
+                $infoHorario['hora_inicio'],
+                $infoHorario['hora_fin'],
+                $validated['fecha'],
+                $validated['doctor_id'],
+                $duracion_slot
+            );
+            if($slots == null){
+                return response()->json(['mensaje' => 'No hay turnos disponibles']);
+            }
+            if($slots == []){
+                return response()->json(['mensaje' => 'No hay turnos disponibles por count']);
+            }
+            return response()->json(['slots' =>$slots]);
+        }catch (Exception $e) {
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
     }
 
     public function turnoDetails($turno_id)
@@ -386,183 +365,6 @@ class TurnoController extends Controller
         return response()->json(['mensaje' => 'Reprogramación enviada correctamente.']);
     }
     /**
-     * Filtrar turnos por especialidad
-     */
-    public function filterByEspecialidad(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'especialidad_id' => 'required|integer|exists:especialidades,especialidad_id',
-            ]);
-
-            // Usar Query Builder con los nombres correctos de columnas
-            $turnos = DB::table('turnos')
-                ->join('pacientes', 'turnos.paciente_id', '=', 'pacientes.id')
-                ->join('doctores', 'turnos.doctor_id', '=', 'doctores.doctor_id')
-                ->join('especialidades', 'doctores.especialidad', '=', 'especialidades.especialidad_id')
-                ->where('especialidades.especialidad_id', $validated['especialidad_id'])
-                ->select(
-                    'turnos.turno_id as id',  // Usar turno_id como id
-                    'turnos.paciente_id',
-                    'turnos.doctor_id',
-                    'turnos.fecha',
-                    'turnos.hora',
-                    'turnos.estado',
-                    'pacientes.id as paciente_id',
-                    'pacientes.nombre_apellido as paciente_nombre_apellido',  // Campo correcto
-                    'pacientes.email as paciente_email',
-                    'doctores.doctor_id',
-                    'doctores.nombre_apellido as doctor_nombre_apellido',
-                    'especialidades.especialidad_id',
-                    'especialidades.nombre as especialidad_nombre'
-                )
-                ->get();
-
-            // Transformar a la estructura esperada
-            $turnosTransformados = $turnos->map(function ($turno) {
-                return [
-                    'id' => $turno->id,
-                    'paciente_id' => $turno->paciente_id,
-                    'doctor_id' => $turno->doctor_id,
-                    'fecha' => $turno->fecha,
-                    'hora' => $turno->hora,
-                    'estado' => $turno->estado,
-                    'paciente' => [
-                        'id' => $turno->paciente_id,
-                        'name' => $turno->paciente_nombre_apellido,  // Usar el campo correcto
-                        'email' => $turno->paciente_email,
-                    ],
-                    'doctor' => [
-                        'doctor_id' => $turno->doctor_id,
-                        'nombre_apellido' => $turno->doctor_nombre_apellido,
-                        'especialidad' => [
-                            'especialidad_id' => $turno->especialidad_id,
-                            'nombre' => $turno->especialidad_nombre
-                        ]
-                    ]
-                ];
-            });
-
-            return response()->json($turnosTransformados);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'error' => 'Datos de entrada inválidos',
-                'message' => $e->getMessage(),
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Error al filtrar turnos por especialidad',
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
-
-    /**
-     * Buscar turnos por campo específico
-     */
-    public function buscarTurnos(Request $request)
-    {
-        try {
-            $validated = $request->validate([
-                'campo' => 'required|string|in:doctor,paciente,especialidad,estado,fecha',
-                'valor' => 'required|string',
-            ]);
-
-            $campo = $validated['campo'];
-            $valor = $validated['valor'];
-
-            // Query base con todas las relaciones
-            $query = DB::table('turnos')
-                ->join('pacientes', 'turnos.paciente_id', '=', 'pacientes.id')
-                ->join('doctores', 'turnos.doctor_id', '=', 'doctores.doctor_id')
-                ->join('especialidades', 'doctores.especialidad', '=', 'especialidades.especialidad_id');
-
-            // Aplicar filtro según el campo seleccionado
-            switch ($campo) {
-                case 'doctor':
-                    $query->where('doctores.nombre_apellido', 'LIKE', "%{$valor}%");
-                    break;
-                case 'paciente':
-                    $query->where('pacientes.nombre_apellido', 'LIKE', "%{$valor}%");
-                    break;
-                case 'especialidad':
-                    $query->where('especialidades.nombre', 'LIKE', "%{$valor}%");
-                    break;
-                case 'estado':
-                    $query->where('turnos.estado', 'LIKE', "%{$valor}%");
-                    break;
-                case 'fecha':
-                    $query->where('turnos.fecha', 'LIKE', "%{$valor}%");
-                    break;
-            }
-
-            // Seleccionar campos y ejecutar query
-            $turnos = $query->select(
-                'turnos.turno_id as id',
-                'turnos.paciente_id',
-                'turnos.doctor_id',
-                'turnos.fecha',
-                'turnos.hora',
-                'turnos.estado',
-                'pacientes.id as paciente_id',
-                'pacientes.nombre_apellido as paciente_nombre_apellido',
-                'pacientes.email as paciente_email',
-                'doctores.doctor_id',
-                'doctores.nombre_apellido as doctor_nombre_apellido',
-                'especialidades.especialidad_id',
-                'especialidades.nombre as especialidad_nombre'
-            )->get();
-
-            // Transformar a la estructura esperada
-            $turnosTransformados = $turnos->map(function ($turno) {
-                return [
-                    'id' => $turno->id,
-                    'paciente_id' => $turno->paciente_id,
-                    'doctor_id' => $turno->doctor_id,
-                    'fecha' => $turno->fecha,
-                    'hora' => $turno->hora,
-                    'estado' => $turno->estado,
-                    'paciente' => [
-                        'id' => $turno->paciente_id,
-                        'name' => $turno->paciente_nombre_apellido,
-                        'email' => $turno->paciente_email,
-                    ],
-                    'doctor' => [
-                        'doctor_id' => $turno->doctor_id,
-                        'nombre_apellido' => $turno->doctor_nombre_apellido,
-                        'especialidad' => [
-                            'especialidad_id' => $turno->especialidad_id,
-                            'nombre' => $turno->especialidad_nombre
-                        ]
-                    ]
-                ];
-            });
-
-            return response()->json([
-                'data' => $turnosTransformados,
-                'filtro_aplicado' => [
-                    'campo' => $campo,
-                    'valor' => $valor,
-                    'resultados' => $turnosTransformados->count()
-                ]
-            ]);
-
-        } catch (\Illuminate\Validation\ValidationException $e) {
-            return response()->json([
-                'error' => 'Parámetros de búsqueda inválidos',
-                'message' => $e->getMessage(),
-                'errors' => $e->errors()
-            ], 422);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => 'Error al realizar la búsqueda',
-                'message' => $e->getMessage()
-            ], 500);
-        }
-    }
-    /**
      * Obtener todos los datos necesarios para el formulario de creación de turnos
      */
     public function datosFormulario(Request $request)
@@ -576,11 +378,11 @@ class TurnoController extends Controller
 
             // 2. Obtener doctores agrupados por especialidad
             $doctoresPorEspecialidad = DB::table('doctores')
-                ->join('especialidades', 'doctores.especialidad', '=', 'especialidades.especialidad_id')
+                ->join('especialidades', 'doctores.especialidad_id', '=', 'especialidades.especialidad_id')
                 ->select(
                     'doctores.doctor_id as id',
                     'doctores.nombre_apellido as nombre_completo',
-                    'doctores.especialidad as especialidad_id',
+                    'doctores.especialidad_id as especialidad_id',
                     'especialidades.nombre as especialidad_nombre'
                 )
                 ->orderBy('especialidades.nombre')
@@ -670,12 +472,12 @@ class TurnoController extends Controller
     private function generarHorariosDisponibles($horaInicio, $horaFin, $fecha, $doctorId, $duracionMinutos)
     {
         $horarios = [];
-        
+
         try {
             // Convertir las horas (pueden venir como "08:00" o "08:00:00")
             $inicio = \Carbon\Carbon::createFromFormat('H:i', substr($horaInicio, 0, 5));
             $fin = \Carbon\Carbon::createFromFormat('H:i', substr($horaFin, 0, 5));
-            
+
             // Obtener turnos ya ocupados para esa fecha y doctor
             $turnosOcupados = DB::table('turnos')
                 ->where('doctor_id', $doctorId)
@@ -690,7 +492,7 @@ class TurnoController extends Controller
 
             while ($inicio->lessThan($fin)) {
                 $horaSlot = $inicio->format('H:i');
-                
+
                 // Verificar si el slot no está ocupado
                 if (!in_array($horaSlot, $turnosOcupados)) {
                     $horarios[] = [
@@ -699,16 +501,16 @@ class TurnoController extends Controller
                         'display' => $inicio->format('H:i')
                     ];
                 }
-                
+
                 $inicio->addMinutes($duracionMinutos);
             }
-            
+
         } catch (\Exception $e) {
             // En caso de error, devolver array vacío con log del error
             \Log::error('Error generando horarios disponibles: ' . $e->getMessage());
             return [];
         }
-        
+
         return $horarios;
     }
 }
