@@ -71,14 +71,44 @@ class TurnoController extends Controller
         $user = Auth::user();
         try{
             $turnoValidado = $request->validated();
-            $turnoNuevo = Turno::create([
-                'paciente_id' => $user->paciente_id,
-                'doctor_id' => $turnoValidado['doctor_id'],
-                'fecha' => $turnoValidado['fecha'],
-                'hora' => $turnoValidado['hora'],
-                'estado' => 'activo'
-            ]);
-            $turnoNuevo->save();
+            if(Auth::check()){
+                $turnoNuevo = Turno::create([
+                    'paciente_id' => $user->paciente_id,
+                    'doctor_id' => $turnoValidado['doctor_id'],
+                    'fecha' => $turnoValidado['fecha'],
+                    'hora' => $turnoValidado['hora'],
+                    'estado' => 'pendiente'
+                ]);
+                $turnoNuevo->save();
+                Mail::to($user->email)
+                ->send(new NotificacionTurno(
+                    $user->nombre_apellido,
+                    $turnoNuevo->turno_id,
+                    $turnoNuevo->doctor_id,
+                    $turnoNuevo->fecha,
+                    $turnoNuevo->hora,
+                ));
+            }
+            else{
+                $turnoNuevo = Turno::create([
+                    'paciente_id' => $turnoValidado['paciente_id'],
+                    'doctor_id' => $turnoValidado['doctor_id'],
+                    'fecha' => $turnoValidado['fecha'],
+                    'hora' => $turnoValidado['hora'],
+                    'estado' => 'pendiente'
+                ]);
+                $turnoNuevo->save();
+
+                $user = User::find($turnoValidado['paciente_id']);
+                Mail::to($user->email)
+                ->send(new NotificacionTurno(
+                    $user->nombre_apellido,
+                    $turnoNuevo->turno_id,
+                    $turnoNuevo->doctor_id,
+                    $turnoNuevo->fecha,
+                    $turnoNuevo->hora,
+                ));
+            }
         }
         catch (\Illuminate\Validation\ValidationException $e) {
             return response()->json([
@@ -340,7 +370,6 @@ class TurnoController extends Controller
             $turno = Turno::find($validated['turno_id']);
             $turno->update([
                 'estado' => 'pendiente',
-                'fecha_solicitud_reprogramacion' => now(),
                 'solicita_reprogramacion' => true,
                 'reprogramado_por' => Auth::user()->paciente_id,
             ]);

@@ -20,6 +20,7 @@ document.addEventListener('DOMContentLoaded', function () {
 async function fillSelect(select, doctor_id, fecha_str) {
     const fecha = fecha_str.includes(' ') ? new Date(fecha_str) : new Date(fecha_str + ' 00:00:00');
     const result = await cargarTurnosDisponibles(doctor_id, fecha);
+    console.log(result);
         if (!result.data) {
             const option = document.createElement('option');
             option.value = 'No hay disponibles';
@@ -56,7 +57,8 @@ async function cargarTurnosDisponibles(doctorId, fecha) {
 
         return {error: mensaje};
     }
-    slots = await response.json();
+    const data = await response.json();
+    slots = data.slots;
     } catch (error) {
         console.error("Error al cargar los slots disponibles:", error.message);
         return {error: 'Error al cargar los slots disponibles'};
@@ -66,10 +68,14 @@ async function cargarTurnosDisponibles(doctorId, fecha) {
 const cargarHorarios = async (doctor_id) => {
 
     const response = await fetch(`/profesionales/${doctor_id}/horarios`);
+    console.log(response);
     if (!response.ok) {
         throw new Error('Error al cargar los horarios');
     }
-    const horarios = await response.json();
+    const dataHoras = await response.json();
+    const horarios = dataHoras.horarios_laborales;
+    console.log(horarios);
+
     const dias_semana = ['Lunes', 'Martes', 'Miercoles', 'Jueves', 'Viernes', 'Sabado'];
 
 
