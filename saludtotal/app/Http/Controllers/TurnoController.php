@@ -51,12 +51,26 @@ class TurnoController extends Controller
             $query->where('fecha', $request->fecha);
         }
 
+        if ($request->filled('desde') && $request->filled('hasta')) {
+            $query->whereBetween('fecha', [$request->desde, $request->hasta]);
+        } elseif ($request->filled('desde')) {
+            $query->where('fecha', '>=', $request->desde);
+        } elseif ($request->filled('hasta')) {
+            $query->where('fecha', '<=', $request->hasta);
+        }
         // Filtro por especialidad
         if ($request->filled('especialidad') && $request->especialidad !== 'todos') {
             $query->whereHas('especialidad', function ($q) use ($request) {
                 $q->where('nombre', $request->especialidad);
             });
         }
+
+        if($request->filled('estado') && $request->estado !== 'todos'){
+            $query->where('estado', $request->estado);
+        }
+
+        // Orden personalizado por estado
+        $query->orderByRaw("FIELD(estado, 'pendiente', 'activo', 'aceptado', 'cancelado')");
 
         $turnos = $query->get();
 
@@ -95,7 +109,7 @@ class TurnoController extends Controller
                     'doctor_id' => $turnoValidado['doctor_id'],
                     'fecha' => $turnoValidado['fecha'],
                     'hora' => $turnoValidado['hora'],
-                    'estado' => 'pendiente'
+                    'estado' => 'activo'
                 ]);
                 $turnoNuevo->save();
 

@@ -28,7 +28,7 @@ Route::prefix('turnos')->group(function () {
     Route::post('/', [ApiTurnoController::class, 'crearTurno']);
     Route::get('/especialidades', [ApiTurnoController::class, 'especialidadesWithDoctores']);
     Route::get('/disponibles', [TurnoController::class, 'turnosDisponibles']);
-    Route::post('/store', [TurnoController::class, 'store'])->name('turnos.store.desktop');
+    Route::post('/store', [TurnoController::class, 'store']);
 });
 
 // Rutas para profesionales (reutilizando el controlador existente)
