@@ -34,6 +34,7 @@ Route::prefix('turnos')->group(function () {
 // Rutas para profesionales (reutilizando el controlador existente)
 // seria api/desktop/profesionales
 Route::prefix('profesionales')->group(function () {
+    Route::get('/', [ProfesionalesController::class, 'doctores']);
     Route::get('/especialidades', [ProfesionalesController::class, 'especialidades']);
     Route::get('/especialidades/{especialidad_id}/doctores', [ProfesionalesController::class, 'doctoresByEspecialidad']);
     Route::get('/doctores', [ProfesionalesController::class, 'doctores']);
