@@ -20,6 +20,7 @@ use App\Models\User;
 use App\Enum\EstadoTurno;
 use App\Enum\EstadoSolicitudReprogramacion;
 use App\Http\Requests\ReprogramarTurnoRequest;
+use Illuminate\Support\Facades\Validator;
 class TurnoController extends Controller
 {
     public function create()
@@ -76,6 +77,20 @@ class TurnoController extends Controller
         return response()->json($turnos);
     }
 
+    public function getTurnoById($id) {
+        $turno = Turno::with(['paciente', 'doctor', 'especialidad'])->find($id);
+
+        if (!$turno) {
+            return response()->json([
+                'mensaje' => 'Turno no encontrado',
+                'detalle' => "No existe un turno con ID $id"
+            ], 404);
+        }
+
+        return response()->json([
+            'mensaje' => 'Turno encontrado',
+            'turno' => $turno]);
+    }
     public function aceptarTurno(Request $request, $turno_id)
     {
         $turno = Turno::find($turno_id);
@@ -209,20 +224,37 @@ class TurnoController extends Controller
             ], 400);
         }
 
-        try{
+        try {
             $requestForm = new ReprogramarTurnoRequest();
+            $requestForm->merge($request->all());
+
             $rules = $requestForm->rules();
-            $messages = $requestForm->messages(); // si los tenés
+            $messages = $requestForm->messages();
             $validator = Validator::make($request->all(), $rules, $messages);
 
-            $turno->fecha = $validatedTurno['fecha'];
-            $turno->hora = $validatedTurno['hora'];
+            if ($validator->fails()) {
+                return response()->json([
+                    'mensaje' => 'Validación fallida',
+                    'errores' => $validator->errors()
+                ], 422);
+            }
+
+            $validados = $validator->validated();
+
+            $turno->fecha = $validados['fecha'];
+            $turno->hora = $validados['hora'];
             $turno->estado = EstadoTurno::ACTIVO;
+            $turno->reprogramado = true;
+            $turno->save();
+
+            return response()->json([
+                'mensaje' => 'Turno Reprogramado correctamente',
+                'turno' => $turno
+            ]);
         }
-        catch (\Illuminate\Validation\ValidationException $e) {
+        catch (\Exception $e) {
             return response()->json([
                 'mensaje' => $e->getMessage(),
-                'errores' => $e->errors()
             ], 422);
         }
     }
@@ -311,14 +343,18 @@ class TurnoController extends Controller
                 $duracion_slot
             );
             if($slots == null){
-                return response()->json(['mensaje' => 'No hay turnos disponibles']);
+                return response()->json([
+                    'mensaje' => 'No hay turnos disponibles']);
             }
             if($slots == []){
-                return response()->json(['mensaje' => 'No hay turnos disponibles por count']);
+                return response()->json([
+                    'mensaje' => 'No hay turnos disponibles por count']);
             }
-            return response()->json(['slots' =>$slots]);
+            return response()->json([
+                'slots' =>$slots]);
         }catch (Exception $e) {
-            return response()->json(['mensaje' => $e->getMessage()]);
+            return response()->json([
+                'mensaje' => $e->getMessage()]);
         }
     }
 

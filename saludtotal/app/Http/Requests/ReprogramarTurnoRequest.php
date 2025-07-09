@@ -3,6 +3,9 @@
 namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
+use App\Rules\FechaDisponible;
+use App\Rules\HorarioValido;
+use App\Rules\TurnoUnico;
 
 class ReprogramarTurnoRequest extends FormRequest
 {

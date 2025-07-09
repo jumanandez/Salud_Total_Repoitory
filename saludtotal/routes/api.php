@@ -29,6 +29,7 @@ Route::prefix('turnos')->group(function () {
     Route::get('/especialidades', [ApiTurnoController::class, 'especialidadesWithDoctores']);
     Route::get('/disponibles', [TurnoController::class, 'turnosDisponibles']);
     Route::post('/store', [TurnoController::class, 'crearTurno']);
+    Route::get('/{turno_id}', [TurnoController::class, 'getTurnoById']);
     Route::patch('/{turno_id}/aceptar', [TurnoController::class, 'aceptarTurno']);
     Route::patch('/{turno_id}/cancelar', [TurnoController::class, 'cancelarTurno']);
     Route::patch('/{turno_id}/rechazar', [TurnoController::class, 'rechazarTurno']);

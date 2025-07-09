@@ -5,6 +5,7 @@ namespace App\Rules;
 use Closure;
 use Illuminate\Contracts\Validation\ValidationRule;
 use App\Models\HorarioDisponible;
+use Carbon\Carbon;
 class HorarioValido implements ValidationRule
 {
     protected $doctor_id;
@@ -20,7 +21,7 @@ class HorarioValido implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        $diaDeLaSemanaPedido = date('N', strtotime($this->fecha));
+        $diaDeLaSemanaPedido = Carbon::parse($this->fecha, 'America/Argentina/Buenos_Aires')->dayOfWeekIso;
 
         $horarioDisponible = HorarioDisponible::
             where('doctor_id', $this->doctor_id)
