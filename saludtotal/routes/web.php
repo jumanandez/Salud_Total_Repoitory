@@ -32,7 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::get('turnos/create', [TurnoController::class, 'create'])->name('turnos.create');
     Route::post('turnos/store-desktop', [TurnoController::class, 'storeDesktop'])->name('turnos.store.desktop');
     Route::get('/turnos/mis-turnos', [TurnoController::class, 'misTurnos'])->name('mis-turnos');
-    Route::post('turnos/solicitar-turno', [TurnoController::class, 'store'])->name('turnos.store');
+    Route::post('turnos/solicitar-turno', [TurnoController::class, 'crearTurno'])->name('turnos.store');
     Route::get('turnos/mis-turnos/{turno_id}',
         [TurnoController::class, 'turnoDetails'])->name('turnos.details');
 

@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Models\Doctor;
 use App\Models\Especialidad;
 use Illuminate\Database\Eloquent\Relations\HasOneThrough;
+use App\Enum\EstadoTurno;
 class Turno extends Model
 {
     protected $table = 'turnos';
@@ -31,6 +32,7 @@ class Turno extends Model
     ];
 
     protected $casts = [
+        'estado' => EstadoTurno::class,
         'fecha' => 'date',
         'fecha_solicitud_cancelacion' => 'date',
         'fecha_solicitud_reprogramacion' => 'date',

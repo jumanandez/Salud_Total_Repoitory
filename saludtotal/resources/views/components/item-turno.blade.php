@@ -6,7 +6,7 @@
             <span class="font-normal text-gray-400">#ID: {{ $turno->turno_id }}</span>
         </span>
         <span class="text-sm text-gray-900 mt-1">
-            {{ \Carbon\Carbon::parse($turno->fecha)->format('d-m-Y') }} - {{ $turno->hora }} {{ "({$turno->estado})" }}
+            {{ \Carbon\Carbon::parse($turno->fecha)->format('d-m-Y') }} - {{ $turno->hora }} {{ "({$turno->estado->value})" }}
         </span>
     </div>
     <a

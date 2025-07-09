@@ -17,13 +17,11 @@ use App\Http\Requests\StoreSolicitudReprogramacionRequest;
 use App\Mail\NotificacionTurno;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
+use App\Enum\EstadoTurno;
+use App\Enum\EstadoSolicitudReprogramacion;
+use App\Http\Requests\ReprogramarTurnoRequest;
 class TurnoController extends Controller
 {
-
-
-    /**
-     * Show the form for creating a new resource.
-     */
     public function create()
     {
         return view('turnos.create');
@@ -70,17 +68,165 @@ class TurnoController extends Controller
         }
 
         // Orden personalizado por estado
-        $query->orderByRaw("FIELD(estado, 'pendiente', 'activo', 'aceptado', 'cancelado')");
+        $query->orderByRaw("FIELD(estado,
+        'pendiente', 'activo', 'aceptado','cancelado', 'rechazado', 'atendido','desaprovechado')");
 
         $turnos = $query->get();
 
         return response()->json($turnos);
     }
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(StoreTurnoRequest $request)
+    public function aceptarTurno(Request $request, $turno_id)
+    {
+        $turno = Turno::find($turno_id);
+
+        if (!$turno) {
+            return response()->json([
+                'mensaje' => 'Turno no encontrado',
+                'detalle' => "No existe un turno con ID $turno_id"
+            ], 404);
+        }
+
+        if ($turno->estado !== EstadoTurno::PENDIENTE) {
+            return response()->json([
+                'mensaje' => 'No se puede aceptar un turno que no está pendiente',
+                'detalle' => "El estado actual es '{$turno->estado->value}'"
+            ], 400);
+        }
+
+        try{
+            $turno->estado = EstadoTurno::ACEPTADO;
+            $turno->save();
+        }catch(Exception $e){
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
+
+        return response()->json([
+            'mensaje' => 'Turno aceptado correctamente',
+        ],200);
+    }
+    public function rechazarTurno(Request $request, $turno_id)
+    {
+        $turno = Turno::find($turno_id);
+
+        if (!$turno) {
+            return response()->json([
+                'mensaje' => 'Turno no encontrado',
+                'detalle' => "No existe un turno con ID $turno_id"
+            ], 404);
+        }
+
+        if ($turno->estado !== EstadoTurno::PENDIENTE) {
+            return response()->json([
+                'mensaje' => 'No se puede rechazar un turno que no está pendiente',
+                'detalle' => "El estado actual es '{$turno->estado->value}'"
+            ], 400);
+        }
+
+        try{
+            $turno->estado = EstadoTurno::RECHAZADO;
+            $turno->save();
+        }catch(Exception $e){
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
+        return response()->json([
+            'mensaje' => 'Turno rechazado correctamente',
+        ],200);
+    }
+    public function cancelarTurno(Request $request, $turno_id)
+    {
+        $turnoACancelar = Turno::find($turno_id);
+        if(!$turnoACancelar){
+            return response()->json([
+                'mensaje' => 'Turno no encontrado',
+                'detalle' => "No se encontró un Turno con $turno_id"],
+                404);
+        }
+
+        if($turnoACancelar->estado == EstadoTurno::CANCELADO){
+            //Podria haber otras condiciones de estado
+            return response()->json([
+                'mensaje' => 'El Turno ya se encuentra Cancelado.',
+                'detalle' => "El estado actual del Turno es '{$turnoACancelar->estado->value}'"
+            ], 400);
+        }else if($turnoACancelar->estado == EstadoTurno::ATENDIDO){
+            return response()->json([
+                'mensaje' => 'El Turno ya se encuentra Atendido.',
+                'detalle' => "No se puede cancelar un Turno '{$turnoACancelar->estado->value}'"
+            ], 400);
+        }else if($turnoACancelar->estado == EstadoTurno::RECHAZADO){
+            return response()->json([
+                'mensaje' => 'El Turno ya se encuentra Rechazado.',
+                'detalle' => "No se puede cancelar un Turno '{$turnoACancelar->estado->value}'"
+            ], 400);
+        }else if($turnoACancelar->estado == EstadoTurno::DESAPROVECHADO){
+            return response()->json([
+                'mensaje' => 'El Turno ya se encuentra Desaprovechado.',
+                'detalle' => "No se puede cancelar un Turno '{$turnoACancelar->estado->value}'"
+            ], 400);
+        }
+
+        try{
+            $turnoACancelar->estado = EstadoTurno::CANCELADO;
+            $turnoACancelar->canceled_at = now();
+            $turnoACancelar->save();
+        }catch(Exception $e){
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
+
+        return response()->json([
+            'mensaje' => 'Turno cancelado correctamente.'],
+            200);
+    }
+    public function reprogramarTurno(Request $request, $turno_id)
+    {
+        $turno = Turno::find($turno_id);
+        if(!$turno){
+            return response()->json([
+                'mensaje' => 'Turno no encontrado',
+                'detalle' => "No se encontró un Turno con ID $turno_id"
+            ], 404);
+        }
+        if($turno->estado == EstadoTurno::CANCELADO){
+            return response()->json([
+                'mensaje' => 'El Turno ya se encuentra Cancelado.',
+                'detalle' => "No se puede Reprogramar un Turno '{$turno->estado->value}'"
+            ], 400);
+        }else if($turno->estado == EstadoTurno::ATENDIDO){
+            return response()->json([
+                'mensaje' => 'El Turno ya se encuentra Atendido.',
+                'detalle' => "No se puede reprogramar un Turno '{$turno->estado->value}'"
+            ], 400);
+        }else if($turno->estado == EstadoTurno::RECHAZADO){
+            return response()->json([
+                'mensaje' => 'El Turno ya se encuentra Rechazado.',
+                'detalle' => "No se puede reprogramar un Turno '{$turno->estado->value}'"
+            ], 400);
+        }else if($turno->estado == EstadoTurno::DESAPROVECHADO){
+            return response()->json([
+                'mensaje' => 'El Turno ya se encuentra Desaprovechado.',
+                'detalle' => "No se puede reprogramar un Turno '{$turno->estado->value}'"
+            ], 400);
+        }
+
+        try{
+            $requestForm = new ReprogramarTurnoRequest();
+            $rules = $requestForm->rules();
+            $messages = $requestForm->messages(); // si los tenés
+            $validator = Validator::make($request->all(), $rules, $messages);
+
+            $turno->fecha = $validatedTurno['fecha'];
+            $turno->hora = $validatedTurno['hora'];
+            $turno->estado = EstadoTurno::ACTIVO;
+        }
+        catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'mensaje' => $e->getMessage(),
+                'errores' => $e->errors()
+            ], 422);
+        }
+    }
+    public function crearTurno(StoreTurnoRequest $request)
     {
         $user = Auth::user();
         try{
@@ -91,7 +237,7 @@ class TurnoController extends Controller
                     'doctor_id' => $turnoValidado['doctor_id'],
                     'fecha' => $turnoValidado['fecha'],
                     'hora' => $turnoValidado['hora'],
-                    'estado' => 'pendiente'
+                    'estado' => EstadoTurno::PENDIENTE
                 ]);
                 $turnoNuevo->save();
                 Mail::to($user->email)
@@ -136,140 +282,7 @@ class TurnoController extends Controller
         return response()->json(['mensaje' => 'Turno creado Exitosamente',
         "Turno" => $turnoNuevo]);
     }
-    public function storeDesktop(Request $request)
-    {
 
-        // try {
-        //     // Validación de los datos
-        //     $validated = $request->validate([
-        //         // Datos del paciente
-        //         'paciente_nombre_apellido' => 'required|string|max:255',
-        //         'paciente_telefono' => 'nullable|string|max:20',
-        //         'paciente_email' => 'required|email|max:255',
-
-        //         // Datos del turno
-        //         'doctor_id' => 'required|integer|exists:doctores,doctor_id',
-        //         'fecha' => 'required|date|after_or_equal:today',
-        //         'hora' => 'required|date_format:H:i',
-        //         'especialidad_id' => 'required|integer|exists:especialidades,especialidad_id',
-        //     ]);
-
-        //     DB::beginTransaction();
-
-        //     // 1. Verificar si el paciente ya existe por email
-        //     $paciente = DB::table('pacientes')
-        //         ->where('email', $validated['paciente_email'])
-        //         ->first();
-
-        //     // 2. Si no existe, crear el paciente
-        //     if (!$paciente) {
-        //         $pacienteId = DB::table('pacientes')->insertGetId([
-        //             'nombre_apellido' => $validated['paciente_nombre_apellido'],
-        //             'telefono' => $validated['paciente_telefono'] ?? null,
-        //             'email' => $validated['paciente_email'],
-        //             'created_at' => now(),
-        //             'updated_at' => now(),
-        //         ]);
-        //     } else {
-        //         $pacienteId = $paciente->id;
-        //     }
-
-        //     // 3. Verificar disponibilidad del turno
-        //     $turnoExistente = DB::table('turnos')
-        //         ->where('doctor_id', $validated['doctor_id'])
-        //         ->where('fecha', $validated['fecha'])
-        //         ->where('hora', $validated['hora'])
-        //         ->where('estado', '!=', 'cancelado')
-        //         ->first();
-
-        //     if ($turnoExistente) {
-        //         throw new \Exception('El horario seleccionado ya está ocupado');
-        //     }
-
-        //     // 4. Crear el turno
-        //     $turnoId = DB::table('turnos')->insertGetId([
-        //         'paciente_id' => $pacienteId,
-        //         'doctor_id' => $validated['doctor_id'],
-        //         'fecha' => $validated['fecha'],
-        //         'hora' => $validated['hora'],
-        //         'estado' => 'activo',
-        //         'created_at' => now(),
-        //         'updated_at' => now(),
-        //     ]);
-
-        //     // 5. Obtener el turno completo con todas las relaciones
-        //     $turnoCompleto = DB::table('turnos')
-        //         ->join('pacientes', 'turnos.paciente_id', '=', 'pacientes.paciente_id')
-        //         ->join('doctores', 'turnos.doctor_id', '=', 'doctores.doctor_id')
-        //         ->join('especialidades', 'doctores.especialidad_id', '=', 'especialidades.especialidad_id')
-        //         ->where('turnos.turno_id', $turnoId)
-        //         ->select(
-        //             'turnos.turno_id as id',
-        //             'turnos.paciente_id',
-        //             'turnos.doctor_id',
-        //             'turnos.fecha',
-        //             'turnos.hora',
-        //             'turnos.estado',
-        //             'pacientes.paciente_id',
-        //             'pacientes.nombre_apellido as paciente_nombre_apellido',
-        //             'pacientes.email as paciente_email',
-        //             'pacientes.telefono as paciente_telefono',
-        //             'doctores.doctor_id',
-        //             'doctores.nombre_apellido as doctor_nombre_apellido',
-        //             'especialidades.especialidad_id',
-        //             'especialidades.nombre as especialidad_nombre'
-        //         )
-        //         ->first();
-
-        //     DB::commit();
-
-        //     // 6. Transformar a la estructura esperada
-        //     $turnoTransformado = [
-        //         'id' => $turnoCompleto->id,
-        //         'paciente_id' => $turnoCompleto->paciente_id,
-        //         'doctor_id' => $turnoCompleto->doctor_id,
-        //         'fecha' => $turnoCompleto->fecha,
-        //         'hora' => $turnoCompleto->hora,
-        //         'estado' => $turnoCompleto->estado,
-        //         'paciente' => [
-        //             'id' => $turnoCompleto->paciente_id,
-        //             'name' => $turnoCompleto->paciente_nombre_apellido,
-        //             'email' => $turnoCompleto->paciente_email,
-        //             'telefono' => $turnoCompleto->paciente_telefono,
-        //         ],
-        //         'doctor' => [
-        //             'doctor_id' => $turnoCompleto->doctor_id,
-        //             'nombre_apellido' => $turnoCompleto->doctor_nombre_apellido,
-        //             'especialidad' => [
-        //                 'especialidad_id' => $turnoCompleto->especialidad_id,
-        //                 'nombre' => $turnoCompleto->especialidad_nombre
-        //             ]
-        //         ]
-        //     ];
-
-        //     return response()->json([
-        //         'success' => true,
-        //         'message' => 'Turno creado exitosamente',
-        //         'data' => $turnoTransformado
-        //     ], 201);
-
-        // } catch (\Illuminate\Validation\ValidationException $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'success' => false,
-        //         'error' => 'Datos de entrada inválidos',
-        //         'message' => 'Por favor verifica los datos ingresados',
-        //         'errors' => $e->errors()
-        //     ], 422);
-        // } catch (\Exception $e) {
-        //     DB::rollback();
-        //     return response()->json([
-        //         'success' => false,
-        //         'error' => 'Error al crear el turno',
-        //         'message' => $e->getMessage()
-        //     ], 500);
-        // }
-    }
     public function turnosDisponibles(Request $request)
     {
         try {
@@ -338,11 +351,10 @@ class TurnoController extends Controller
             $turno = Turno::find($turno_id);
             $turno->
             update([
-            'estado' => 'pendiente',
+            'estado' => EstadoTurno::PENDIENTE,
             'fecha_solicitud_cancelacion' => now(),
             'solicita_cancelacion' => true,
             'cancelado_por' => Auth::user()->paciente_id,
-            'fecha_edicion' => now(),
             ]);
             $turno->save();
         }catch(Exception $e){
@@ -355,21 +367,6 @@ class TurnoController extends Controller
             'request' => $request
         ]);
     }
-    public function cancelar(Turno $turno)
-    {
-        try{
-            $turno->update([
-            'estado' => 'cancelado',
-            'fecha_cancelacion' => now(),
-            'cancelado_por' => Auth::user()->paciente_id,
-            'fecha_edicion' => now(),
-            ]);
-        }catch(Exception $e){
-            return response()->json(['mensaje' => $e->getMessage()]);
-        }
-
-        return response()->json(['mensaje' => 'Turno cancelado correctamente.']);
-    }
     public function solicitarReprogramacion(StoreSolicitudReprogramacionRequest $request)
     {
         $validated = $request->validated();
@@ -378,12 +375,12 @@ class TurnoController extends Controller
                 'turno_id' => $validated['turno_id'],
                 'fecha' => $validated['nueva_fecha'],
                 'hora' => $validated['nueva_hora'],
-                'estado' => 'pendiente'
+                'estado' => EstadoSolicitudReprogramacion::PENDIENTE
             ]);
             $solicitud->save();
             $turno = Turno::find($validated['turno_id']);
             $turno->update([
-                'estado' => 'pendiente',
+                'estado' => EstadoSolicitudReprogramacion::PENDIENTE,
                 'solicita_reprogramacion' => true,
                 'reprogramado_por' => Auth::user()->paciente_id,
             ]);
@@ -393,23 +390,6 @@ class TurnoController extends Controller
 
         return response()->json(['mensaje' => 'Solicitud de reprogramación enviada correctamente.',
                                 'turno' => $solicitud]);
-    }
-    public function reprogramar(Turno $turno)
-    {
-        try{
-            //USAR EL PACIENTE_ID DEL TURNO
-            // $turno->update([
-            // 'estado' => 'activo',
-            // 'reprogramado' => true,
-            // 'fecha_reprogramacion' => now(),
-            // 'reprogramado_por' => Auth::user()->paciente_id,
-            // 'fecha_edicion' => now(),
-            // ]);
-        }catch(Exception $e){
-            return response()->json(['mensaje' => $e->getMessage()]);
-        }
-
-        return response()->json(['mensaje' => 'Reprogramación enviada correctamente.']);
     }
     /**
      * Obtener todos los datos necesarios para el formulario de creación de turnos
@@ -451,7 +431,7 @@ class TurnoController extends Controller
                 $infoHorario = DB::table('disponibilidades_doctores')
                     ->where('doctor_id', $validated['doctor_id'])
                     ->where('dia_semana', $diaSemana)
-                    ->where('activo', 1)
+                    ->where('estado', 1)
                     ->first(['hora_inicio', 'hora_fin']);
 
                 if ($infoHorario) {
