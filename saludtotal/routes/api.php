@@ -3,6 +3,7 @@
 use App\Http\Controllers\ApiTurnoController;
 use App\Http\Controllers\TurnoController;
 use App\Http\Controllers\ProfesionalesController;
+use App\Http\Controllers\EstadisticasController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -47,3 +48,12 @@ Route::prefix('profesionales')->group(function () {
     Route::get('/{doctor_id}/horarios', [ProfesionalesController::class, 'horarios']);
     Route::get('/doctor/{doctor_id}', [ProfesionalesController::class, 'nombreDoctorById']);
 });
+
+// Rutas para estadísticas
+Route::prefix('estadisticas')->group(function () {
+    Route::get('/doctor/{doctor_id}', [EstadisticasController::class, 'estadisticasPorDoctor']);
+    Route::get('/doctor/{doctor_id}/fechas', [EstadisticasController::class, 'estadisticasPorDoctorConFechas']);
+    Route::get('/globales', [EstadisticasController::class, 'estadisticasGlobales']);
+    Route::get('/doctores', [EstadisticasController::class, 'estadisticasPorTodosLosDoctores']);
+});
+
