@@ -15,6 +15,8 @@ use Illuminate\Support\Facades\DB;
 use App\Models\solicitudReprogramacion;
 use App\Http\Requests\StoreSolicitudReprogramacionRequest;
 use App\Mail\NotificacionTurno;
+use App\Mail\MailTurnoAceptado;
+use App\Mail\MailTurnoRechazado;
 use Illuminate\Support\Facades\Mail;
 use App\Models\User;
 use App\Enum\EstadoTurno;
@@ -112,6 +114,15 @@ class TurnoController extends Controller
         try{
             $turno->estado = EstadoTurno::ACEPTADO;
             $turno->save();
+
+            Mail::to($turno->paciente->email)->send(new MailTurnoAceptado(
+                $turno->paciente->nombre_apellido,
+                $turno->turno_id,
+                $turno->doctor_id,
+                $turno->fecha,
+                $turno->hora,
+                $turno->estado->value
+            ));
         }catch(Exception $e){
             return response()->json(['mensaje' => $e->getMessage()]);
         }
@@ -141,6 +152,30 @@ class TurnoController extends Controller
         try{
             $turno->estado = EstadoTurno::RECHAZADO;
             $turno->save();
+
+            if(isset($request['mensaje']) && trim($request['mensaje']) !== ''){
+                $mensaje = trim($request['mensaje']);
+
+                Mail::to($turno->paciente->email)->send(new MailTurnoRechazado(
+                    $turno->paciente->nombre_apellido,
+                    $turno->turno_id,
+                    $turno->doctor_id,
+                    $turno->fecha,
+                    $turno->hora,
+                    $turno->estado->value,
+                    $mensaje
+                ));
+            }
+            else{
+                Mail::to($turno->paciente->email)->send(new MailTurnoRechazado(
+                    $turno->paciente->nombre_apellido,
+                    $turno->turno_id,
+                    $turno->doctor_id,
+                    $turno->fecha,
+                    $turno->hora,
+                    $turno->estado->value
+                ));
+            }
         }catch(Exception $e){
             return response()->json(['mensaje' => $e->getMessage()]);
         }
@@ -279,6 +314,7 @@ class TurnoController extends Controller
                     $turnoNuevo->doctor_id,
                     $turnoNuevo->fecha,
                     $turnoNuevo->hora,
+                    $turnoNuevo->estado->value
                 ));
             }
             else{
@@ -299,6 +335,7 @@ class TurnoController extends Controller
                     $turnoNuevo->doctor_id,
                     $turnoNuevo->fecha,
                     $turnoNuevo->hora,
+                    $turnoNuevo->estado->value
                 ));
             }
         }

@@ -1,15 +1,15 @@
 <?php
 
-
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Mail\Mailables\Content;
 use Illuminate\Mail\Mailables\Envelope;
 use Illuminate\Queue\SerializesModels;
-use App\Models\Doctor;
-class NotificacionTurno extends Mailable
+
+class MailTurnoAceptado extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -18,32 +18,45 @@ class NotificacionTurno extends Mailable
     public string $doctor;
     public string $fecha;
     public string $hora;
-    public string $estado; // Estado por defecto, puede ser modificado si es necesario
-
+    public string $estado;
+    /**
+     * Create a new message instance.
+     */
     public function __construct($nombre, $id_turno, $doctor, $fecha, $hora, $estado)
     {
         $this->nombre = $nombre;
         $this->id_turno = $id_turno;
-        $this->doctor = Doctor::find($doctor)->nombre_apellido;
+        $this->doctor = $doctor; // Asumimos que ya es el nombre completo del doctor
         $this->fecha = $fecha;
         $this->hora = $hora;
         $this->estado = ucfirst($estado); // Aseguramos que el estado esté en formato legible
     }
 
+    /**
+     * Get the message envelope.
+     */
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: 'Notificación de Turno',
+            subject: 'Mail Turno Aceptado',
         );
     }
 
+    /**
+     * Get the message content definition.
+     */
     public function content(): Content
     {
         return new Content(
-            view: 'mail.notificacion-turno',
+            view: 'mail.mail-turno-aceptado',
         );
     }
 
+    /**
+     * Get the attachments for the message.
+     *
+     * @return array<int, \Illuminate\Mail\Mailables\Attachment>
+     */
     public function attachments(): array
     {
         return [];
