@@ -2,7 +2,7 @@
 
 namespace App\Enum;
 
-enum EstadoSolicitudReprogramacion
+enum EstadoSolicitudReprogramacion: string
 {
     case PENDIENTE = 'pendiente';
     case ACEPTADO = 'aceptado';

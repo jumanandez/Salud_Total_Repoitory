@@ -12,7 +12,7 @@ use App\Rules\FechaDisponible;
 use Carbon\Carbon;
 use App\ListarHorariosDisponibles;
 use Illuminate\Support\Facades\DB;
-use App\Models\solicitudReprogramacion;
+use App\Models\SolicitudReprogramacion;
 use App\Http\Requests\StoreSolicitudReprogramacionRequest;
 use App\Mail\NotificacionTurno;
 use App\Mail\MailTurnoAceptado;
@@ -440,11 +440,26 @@ class TurnoController extends Controller
             'request' => $request
         ]);
     }
+
+    public function getSolicitudesReprogramacion()
+    {
+        try{
+            $solicitudes = SolicitudReprogramacion::with(['turno.paciente', 'turno.doctor'])
+                ->get();
+            return response()->json([
+                'solicitudes' => $solicitudes
+            ]);
+        }catch(Exception $e){
+            return response()->json([
+                'mensaje' => 'Error al obtener solicitudes de reprogramación.',
+                'detalle' => $e->getMessage()]);
+        }
+    }
     public function solicitarReprogramacion(StoreSolicitudReprogramacionRequest $request)
     {
         $validated = $request->validated();
         try{
-            $solicitud = solicitudReprogramacion::create([
+            $solicitud = SolicitudReprogramacion::create([
                 'turno_id' => $validated['turno_id'],
                 'fecha' => $validated['nueva_fecha'],
                 'hora' => $validated['nueva_hora'],
@@ -453,7 +468,7 @@ class TurnoController extends Controller
             $solicitud->save();
             $turno = Turno::find($validated['turno_id']);
             $turno->update([
-                'estado' => EstadoSolicitudReprogramacion::PENDIENTE,
+                'estado' => EstadoTurno::PENDIENTE,
                 'solicita_reprogramacion' => true,
                 'reprogramado_por' => Auth::user()->paciente_id,
             ]);

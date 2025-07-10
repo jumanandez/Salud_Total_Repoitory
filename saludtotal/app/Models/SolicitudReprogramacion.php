@@ -12,9 +12,14 @@ class SolicitudReprogramacion extends Model
         'turno_id',
         'fecha',
         'hora',
+        'estado',
     ];
     protected $casts = [
         'turno_id' => 'integer',
         'fecha' => 'date',
     ];
+    public function turno()
+    {
+        return $this->belongsTo(Turno::class, 'turno_id', 'turno_id');
+    }
 }
