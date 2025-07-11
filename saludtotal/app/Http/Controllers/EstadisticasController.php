@@ -10,13 +10,14 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-
+use App\Models\AusenciasDoctor;
+use App\Models\User;
 /**
  * Controlador para manejar las estadísticas de turnos médicos
- * 
+ *
  * Este controlador proporciona endpoints para obtener estadísticas
  * de turnos tanto por doctor individual como globalmente.
- * 
+ *
  * Funcionalidades incluidas:
  * - Estadísticas por doctor específico
  * - Estadísticas globales de todos los doctores
@@ -50,14 +51,7 @@ class EstadisticasController extends Controller
                 ->keyBy('estado');
 
             // Formatear las estadísticas según los estados solicitados
-            $estadisticas = [
-                'turnosAtendidos' => $estadisticasTurnos->get(EstadoTurno::ATENDIDO->value)?->cantidad ?? 0,
-                'turnosCancelados' => $estadisticasTurnos->get(EstadoTurno::CANCELADO->value)?->cantidad ?? 0,
-                'turnosRechazados' => $estadisticasTurnos->get(EstadoTurno::RECHAZADO->value)?->cantidad ?? 0,
-                'turnosReprogramados' => $this->contarTurnosReprogramados($doctorId),
-                'turnosAceptados' => $estadisticasTurnos->get(EstadoTurno::ACEPTADO->value)?->cantidad ?? 0,
-                'turnosDesaprovechados' => $estadisticasTurnos->get(EstadoTurno::DESAPROVECHADO->value)?->cantidad ?? 0,
-            ];
+
 
             // Calcular ausencias (días sin trabajo)
             $ausencias = $this->calcularAusencias($doctorId);
@@ -86,35 +80,76 @@ class EstadisticasController extends Controller
      *
      * @return JsonResponse
      */
-    public function estadisticasGlobales(): JsonResponse
+    public function estadisticasGlobales(Request $request): JsonResponse
     {
         try {
-            // Obtener estadísticas globales de turnos por estado
-            $estadisticasGlobales = Turno::select('estado', DB::raw('count(*) as cantidad'))
-                ->groupBy('estado')
-                ->get()
-                ->keyBy('estado');
+            // Filtros de fecha
+            $desde = $request->input('desde');
+            $hasta = $request->input('hasta');
 
-            // Formatear las estadísticas según los estados solicitados
-            $estadisticas = [
-                'turnosAtendidos' => $estadisticasGlobales->get(EstadoTurno::ATENDIDO->value)?->cantidad ?? 0,
-                'turnosCancelados' => $estadisticasGlobales->get(EstadoTurno::CANCELADO->value)?->cantidad ?? 0,
-                'turnosRechazados' => $estadisticasGlobales->get(EstadoTurno::RECHAZADO->value)?->cantidad ?? 0,
-                'turnosReprogramados' => $this->contarTurnosReprogramadosGlobal(),
-                'turnosAceptados' => $estadisticasGlobales->get(EstadoTurno::ACEPTADO->value)?->cantidad ?? 0,
-                'turnosDesaprovechados' => $estadisticasGlobales->get(EstadoTurno::DESAPROVECHADO->value)?->cantidad ?? 0,
-            ];
+            // Query base para turnos
+            $turnosTotales = Turno::
+            where(function($query) use ($desde, $hasta) {
+                if ($desde) {
+                    $query->where('fecha', '>=', $desde);
+                }
+                if ($hasta) {
+                    $query->where('fecha', '<=', $hasta);
+                }
+            })->count();
 
-            // Calcular ausencias globales
-            $ausenciasGlobales = $this->calcularAusenciasGlobales();
+            $turnosQuery = function($estado) use ($desde, $hasta) {
+                $query = Turno::where('estado', $estado);
+                if ($desde) {
+                    $query->where('fecha', '>=', $desde);
+                }
+                if ($hasta) {
+                    $query->where('fecha', '<=', $hasta);
+                }
+                return $query->count();
+            };
+
+            $turnosAtendidos = $turnosQuery(EstadoTurno::ATENDIDO->value);
+            $turnosCancelados = $turnosQuery(EstadoTurno::CANCELADO->value);
+            $turnosRechazados = $turnosQuery(EstadoTurno::RECHAZADO->value);
+            $turnosAceptados = $turnosQuery(EstadoTurno::ACEPTADO->value);
+            $turnosDesaprovechados = $turnosQuery(EstadoTurno::DESAPROVECHADO->value);
+
+            // Turnos reprogramados
+            $turnosReprogramadosQuery = Turno::where('reprogramado', true);
+            if ($desde) {
+                $turnosReprogramadosQuery->where('fecha', '>=', $desde);
+            }
+            if ($hasta) {
+                $turnosReprogramadosQuery->where('fecha', '<=', $hasta);
+            }
+            $turnosReprogramados = $turnosReprogramadosQuery->count();
+
+            // Calcular ausencias globales (opcional: podrías filtrar por fecha si tu modelo lo permite)
+            $ausenciasGlobales = AusenciasDoctor::when($desde, function($q) use ($desde) {
+                    $q->where('fecha_inicio', '>=', $desde);
+                })
+                ->when($hasta, function($q) use ($hasta) {
+                    $q->where('fecha_fin', '<=', $hasta);
+                })
+                ->count();
 
             // Total de doctores
             $totalDoctores = Doctor::count();
-
+            $totalUsers = User::count();
             return response()->json([
-                'estadisticas' => $estadisticas,
+                'totalTurnos' => $turnosTotales,
+                'turnosAtendidos' => $turnosAtendidos,
+                'turnosCancelados' => $turnosCancelados,
+                'turnosRechazados' => $turnosRechazados,
+                'turnosAceptados' => $turnosAceptados,
+                'turnosDesaprovechados' => $turnosDesaprovechados,
+                'turnosReprogramados' => $turnosReprogramados,
                 'ausenciasGlobales' => $ausenciasGlobales,
-                'totalDoctores' => $totalDoctores
+                'totalDoctores' => $totalDoctores,
+                'totalPacientes' => $totalUsers,
+                'desde' => $desde,
+                'hasta' => $hasta
             ]);
 
         } catch (\Exception $e) {
@@ -136,16 +171,6 @@ class EstadisticasController extends Controller
         return Turno::where('doctor_id', $doctorId)
             ->where('reprogramado', true)
             ->count();
-    }
-
-    /**
-     * Contar turnos reprogramados globalmente
-     *
-     * @return int
-     */
-    private function contarTurnosReprogramadosGlobal(): int
-    {
-        return Turno::where('reprogramado', true)->count();
     }
 
     /**
@@ -226,14 +251,6 @@ class EstadisticasController extends Controller
                     ->keyBy('estado');
 
                 // Formatear las estadísticas
-                $estadisticas = [
-                    'turnosAtendidos' => $estadisticasTurnos->get(EstadoTurno::ATENDIDO->value)?->cantidad ?? 0,
-                    'turnosCancelados' => $estadisticasTurnos->get(EstadoTurno::CANCELADO->value)?->cantidad ?? 0,
-                    'turnosRechazados' => $estadisticasTurnos->get(EstadoTurno::RECHAZADO->value)?->cantidad ?? 0,
-                    'turnosReprogramados' => $this->contarTurnosReprogramados($doctor->doctor_id),
-                    'turnosAceptados' => $estadisticasTurnos->get(EstadoTurno::ACEPTADO->value)?->cantidad ?? 0,
-                    'turnosDesaprovechados' => $estadisticasTurnos->get(EstadoTurno::DESAPROVECHADO->value)?->cantidad ?? 0,
-                ];
 
                 // Calcular ausencias
                 $ausencias = $this->calcularAusencias($doctor->doctor_id);
@@ -302,14 +319,7 @@ class EstadisticasController extends Controller
                 ->keyBy('estado');
 
             // Formatear las estadísticas según los estados solicitados
-            $estadisticas = [
-                'turnosAtendidos' => $estadisticasTurnos->get(EstadoTurno::ATENDIDO->value)?->cantidad ?? 0,
-                'turnosCancelados' => $estadisticasTurnos->get(EstadoTurno::CANCELADO->value)?->cantidad ?? 0,
-                'turnosRechazados' => $estadisticasTurnos->get(EstadoTurno::RECHAZADO->value)?->cantidad ?? 0,
-                'turnosReprogramados' => $this->contarTurnosReprogramadosConFechas($doctorId, $fechaInicio, $fechaFin),
-                'turnosAceptados' => $estadisticasTurnos->get(EstadoTurno::ACEPTADO->value)?->cantidad ?? 0,
-                'turnosDesaprovechados' => $estadisticasTurnos->get(EstadoTurno::DESAPROVECHADO->value)?->cantidad ?? 0,
-            ];
+
 
             // Calcular ausencias en el rango de fechas
             $ausencias = $this->calcularAusenciasConFechas($doctorId, $fechaInicio, $fechaFin);

@@ -41,4 +41,13 @@ class Doctor extends Model
     {
         return $this->hasMany(Turno::class, 'doctor_id');
     }
+    /**
+     * Get all of the ausencias for the Doctor
+     *
+     * @return \Illuminate\Database\Eloquent\Relations\HasMany
+     */
+    public function ausencias(): HasMany
+    {
+        return $this->hasMany(AusenciasDoctor::class, 'doctor_id', 'doctor_id');
+    }
 }

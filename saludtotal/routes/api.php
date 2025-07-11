@@ -57,9 +57,9 @@ Route::prefix('profesionales')->group(function () {
 
 // Rutas para estadísticas
 Route::prefix('estadisticas')->group(function () {
-    Route::get('/doctor/{doctor_id}', [EstadisticasController::class, 'estadisticasPorDoctor']);
-    Route::get('/doctor/{doctor_id}/fechas', [EstadisticasController::class, 'estadisticasPorDoctorConFechas']);
     Route::get('/globales', [EstadisticasController::class, 'estadisticasGlobales']);
     Route::get('/doctores', [EstadisticasController::class, 'estadisticasPorTodosLosDoctores']);
+    Route::get('/doctor/{doctor_id}', [EstadisticasController::class, 'estadisticasPorDoctor']);
+    Route::get('/doctor/{doctor_id}/fechas', [EstadisticasController::class, 'estadisticasPorDoctorConFechas']);
 });
 
