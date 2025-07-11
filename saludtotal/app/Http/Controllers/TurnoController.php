@@ -9,6 +9,8 @@ use App\Http\Requests\UpdateTurnoRequest;
 use Illuminate\Support\Facades\Auth;
 use App\Models\HorarioDisponible;
 use App\Rules\FechaDisponible;
+use App\Rules\TurnoUnico;
+use App\Rules\HorarioValido;
 use Carbon\Carbon;
 use App\ListarHorariosDisponibles;
 use Illuminate\Support\Facades\DB;
@@ -108,6 +110,18 @@ class TurnoController extends Controller
             return response()->json([
                 'mensaje' => 'No se puede aceptar un turno que no está pendiente',
                 'detalle' => "El estado actual es '{$turno->estado->value}'"
+            ], 400);
+        }
+        if($turno->solicita_reprogramacion){
+            return response()->json([
+                'mensaje' => 'Este turno ha solicitado reprogramación y no puede ser aceptado',
+                'detalle' => "Revise La Seccion de Solicitudes de Reprogramación"
+            ], 400);
+        }
+        if($turno->solicita_cancelacion){
+            return response()->json([
+                'mensaje' => 'Este turno ha solicitado cancelación y no puede ser aceptado',
+                'detalle' => "Revise el Detalle del Turno"
             ], 400);
         }
 
@@ -417,13 +431,81 @@ class TurnoController extends Controller
 
         return view('turnos.misTurnos', compact('turnos'));
     }
+    public function getSolicitudesCancelacion(Request $request)
+    {
+        try{
+            $solcitudesCancelacion = Turno::with(['paciente', 'doctor'])
+                ->where('solicita_cancelacion', true)
+                ->where('estado', EstadoTurno::PENDIENTE)
+                ->get();
 
+            if(!$solcitudesCancelacion){
+                return response()->json([
+                    'mensaje' => 'No se encontraron solicitudes de cancelación'
+                ], 404);
+            }
+
+            return response()->json([
+                'mensaje' => 'alto Mensaje',
+                'solcitudes' => $solcitudesCancelacion
+            ]);
+        }catch(Exception $e){
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
+    }
+    public function aceptarSolicitudCancelacion(Request $request, $turno_id)
+    {
+        try{
+            $turno = Turno::find($turno_id);
+            if(!$turno){
+                return response()->json([
+                    'mensaje' => 'Turno no encontrado',
+                    'detalle' => "No existe un turno con ID $turno_id"
+                ], 404);
+            }
+            $turno->update([
+                'estado' => EstadoTurno::CANCELADO,
+                'canceled_at' => now(),
+            ]);
+        }catch(Exception $e){
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
+
+        return response()->json([
+            'mensaje' => 'Solicitud de cancelación aceptada correctamente.',
+            'turno' => $turno
+        ]);
+    }
+    public function rechazarSolicitudCancelacion(Request $request, $turno_id)
+    {
+        try{
+            $turno = Turno::find($turno_id);
+            if(!$turno){
+                return response()->json([
+                    'mensaje' => 'Turno no encontrado',
+                    'detalle' => "No existe un turno con ID $turno_id"
+                ], 404);
+            }
+            $turno->update([
+                'solicita_cancelacion' => false,
+                'estado' => EstadoTurno::ACTIVO,
+                'fecha_solicitud_cancelacion' => null,
+                'cancelado_por' => null,
+            ]);
+        }catch(Exception $e){
+            return response()->json(['mensaje' => $e->getMessage()]);
+        }
+
+        return response()->json([
+            'mensaje' => 'Solicitud de cancelación rechazada correctamente.',
+            'turno' => $turno
+        ]);
+    }
     public function solicitarCancelacion(Request $request, $turno_id)
     {
         try{
             $turno = Turno::find($turno_id);
-            $turno->
-            update([
+            $turno->update([
             'estado' => EstadoTurno::PENDIENTE,
             'fecha_solicitud_cancelacion' => now(),
             'solicita_cancelacion' => true,
@@ -445,14 +527,22 @@ class TurnoController extends Controller
     {
         try{
             $solicitudes = SolicitudReprogramacion::with(['turno.paciente', 'turno.doctor'])
+            ->where('estado', EstadoSolicitudReprogramacion::PENDIENTE)
                 ->get();
+            if(!$solicitudes){
+                return response()->json([
+                    'mensaje' => 'No se encontraron solicitudes de reprogramación'
+                ], 404);
+            }
+
             return response()->json([
                 'solicitudes' => $solicitudes
             ]);
         }catch(Exception $e){
             return response()->json([
                 'mensaje' => 'Error al obtener solicitudes de reprogramación.',
-                'detalle' => $e->getMessage()]);
+                'detalle' => $e->getMessage()],
+                500);
         }
     }
     public function solicitarReprogramacion(StoreSolicitudReprogramacionRequest $request)
@@ -479,9 +569,104 @@ class TurnoController extends Controller
         return response()->json(['mensaje' => 'Solicitud de reprogramación enviada correctamente.',
                                 'turno' => $solicitud]);
     }
-    /**
-     * Obtener todos los datos necesarios para el formulario de creación de turnos
-     */
+    public function aceptarSolicitudReprogramacion(Request $request, $id)
+    {
+        try{
+            $solicitud = SolicitudReprogramacion::find($id);
+            if(!$solicitud){
+                return response()->json([
+                    'mensaje' => 'Solicitud no encontrada',
+                    'detalle' => "No existe una solicitud con ID $id"
+                ], 404);
+            }
+
+            $turno = Turno::find($solicitud->turno_id);
+            if(!$turno){
+                return response()->json([
+                    'mensaje' => 'Turno no encontrado',
+                    'detalle' => "No existe un turno asociado a la solicitud"
+                ], 404);
+            }
+            $fechaa = Carbon::parse($solicitud->fecha, 'America/Argentina/Buenos_Aires');
+            $datos = [
+                'fecha' => $fechaa->format('Y-m-d'),
+                'hora' => $solicitud->hora,
+            ];
+            $validador = Validator::make($datos, [
+                'fecha' => [new TurnoUnico($turno->doctor_id, $datos['fecha'], $datos['hora'])],
+                'hora' => [new HorarioValido($datos['fecha'], $datos['hora'], $turno->doctor_id)],
+            ]);
+
+            if ($validador->fails()) {
+                return response()->json([
+                    'mensaje' => 'Error al validar el turno.',
+                    'errores' => $validador->errors(),
+                ], 422);
+            }
+
+            $turno->fecha = $solicitud->fecha;
+            $turno->hora = $solicitud->hora;
+            $turno->estado = EstadoTurno::ACEPTADO;
+            $turno->reprogramado = true;
+            $turno->save();
+
+            // Marcar la solicitud como aceptada
+            $solicitud->estado = EstadoSolicitudReprogramacion::ACEPTADO;
+            $solicitud->save();
+
+        }
+        catch (\Illuminate\Validation\ValidationException $e) {
+            return response()->json([
+                'mensaje' => 'Validación fallida',
+                'errores' => $e->errors()
+            ], 422);
+
+        }catch(Exception $e){
+            return response()->json([
+                'mensaje' => 'Error al aceptar la solicitud de reprogramación.',
+                'detalle' => $e->getMessage()
+            ], 500);
+        }
+
+        return response()->json([
+            'mensaje' => 'Solicitud de reprogramación aceptada correctamente.',
+            'turno' => $turno]);
+    }
+    public function rechazarSolicitudReprogramacion (Request $request, $id)
+    {
+        try{
+            $solicitud = SolicitudReprogramacion::find($id);
+            if(!$solicitud){
+                return response()->json([
+                    'mensaje' => 'Solicitud no encontrada',
+                    'detalle' => "No existe una solicitud con ID $id"
+                ], 404);
+            }
+            $turno = Turno::find($solicitud->turno_id);
+            if(!$turno){
+                return response()->json([
+                    'mensaje' => 'Turno no encontrado',
+                    'detalle' => "No existe un turno asociado a la solicitud"
+                ], 404);
+            }
+
+            $turno->estado = EstadoTurno::ACTIVO;
+            // Marcar la solicitud como rechazada
+            $solicitud->estado = EstadoSolicitudReprogramacion::RECHAZADO;
+            $solicitud->save();
+
+
+
+        }catch(Exception $e){
+            return response()->json([
+            'mensaje' => 'Error al rechazar la solicitud de reprogramación.',
+            'detalle' => $e->getMessage()],
+            500);
+        }
+
+        return response()->json(['mensaje' => 'Solicitud de reprogramación rechazada correctamente.',
+                                'solicitud' => $solicitud]);
+    }
     public function datosFormulario(Request $request)
     {
         try {

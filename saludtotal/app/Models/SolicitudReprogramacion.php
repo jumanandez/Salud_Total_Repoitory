@@ -3,11 +3,12 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-
+use App\Enum\EstadoSolicitudReprogramacion;
+use App\Models\Turno;
 class SolicitudReprogramacion extends Model
 {
     protected $table = 'solicitud_reprogramacion';
-    protected $primaryKey = 'solicitud_id';
+    protected $primaryKey = 'id';
     protected $fillable = [
         'turno_id',
         'fecha',
@@ -17,6 +18,7 @@ class SolicitudReprogramacion extends Model
     protected $casts = [
         'turno_id' => 'integer',
         'fecha' => 'date',
+        'estado' => EstadoSolicitudReprogramacion::class,
     ];
     public function turno()
     {

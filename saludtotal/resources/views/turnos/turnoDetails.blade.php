@@ -42,9 +42,6 @@
             @endif
 
             @if($turno->reprogramado)
-                <x-turno.info label="Fecha de reprogramación:" valor="{{ $turno->fecha_reprogramacion->format('d/m/Y') }}">
-                    <i class="fa-solid fa-calendar-days text-xl text-gray-700"></i>
-                </x-turno.info>
                 <x-turno.info label="Reprogramado por (ID):" valor="{{ $turno->reprogramado_por }}">
                     <i class="fa-solid fa-user text-xl text-gray-700"></i>
                 </x-turno.info>

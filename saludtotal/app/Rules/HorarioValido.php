@@ -21,6 +21,7 @@ class HorarioValido implements ValidationRule
      */
     public function validate(string $attribute, mixed $value, Closure $fail): void
     {
+        //$diaDeLaSemanaPedido = date('N', strtotime($this->fecha));
         $diaDeLaSemanaPedido = Carbon::parse($this->fecha, 'America/Argentina/Buenos_Aires')->dayOfWeekIso;
 
         $horarioDisponible = HorarioDisponible::
@@ -29,9 +30,8 @@ class HorarioValido implements ValidationRule
             ->where('hora_inicio', '<=', $value)
             ->where('hora_fin', '>=', $value)
             ->exists();
-
         if (!$horarioDisponible) {
-            $fail('El horario no está disponible para el doctor en esa fecha.');
+            $fail('El horario no está disponible para el doctor en esa fecha.' . $diaDeLaSemanaPedido);
         }
     }
 }

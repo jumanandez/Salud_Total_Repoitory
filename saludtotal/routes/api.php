@@ -31,6 +31,11 @@ Route::prefix('turnos')->group(function () {
     Route::get('/disponibles', [TurnoController::class, 'turnosDisponibles']);
     Route::post('/store', [TurnoController::class, 'crearTurno']);
     Route::get('/solicitudes-reprogramacion', [TurnoController::class, 'getSolicitudesReprogramacion']);
+    Route::patch('/solicitudes-reprogramacion/{id}/aceptar', [TurnoController::class, 'aceptarSolicitudReprogramacion']);
+    Route::patch('/solicitudes-reprogramacion/{id}/rechazar', [TurnoController::class, 'rechazarSolicitudReprogramacion']);
+    Route::get('/solicitudes-cancelacion', [TurnoController::class, 'getSolicitudesCancelacion']);
+    Route::patch('/solicitudes-cancelacion/{turno_id}/aceptar', [TurnoController::class, 'aceptarSolicitudCancelacion']);
+    Route::patch('/solicitudes-cancelacion/{turno_id}/rechazar', [TurnoController::class, 'rechazarSolicitudCancelacion']);
     Route::get('/{turno_id}', [TurnoController::class, 'getTurnoById']);
     Route::patch('/{turno_id}/aceptar', [TurnoController::class, 'aceptarTurno']);
     Route::patch('/{turno_id}/cancelar', [TurnoController::class, 'cancelarTurno']);
