@@ -51,6 +51,7 @@ Route::prefix('profesionales')->group(function () {
     Route::get('/especialidades', [ProfesionalesController::class, 'especialidades']);
     Route::get('/especialidades/{especialidad_id}/doctores', [ProfesionalesController::class, 'doctoresByEspecialidad']);
     Route::get('/doctores', [ProfesionalesController::class, 'doctores']);
+    Route::get('/ausencias/{doctorId}', [ProfesionalesController::class, 'getAusenciasByDoctor']);
     Route::get('/{doctor_id}/horarios', [ProfesionalesController::class, 'horarios']);
     Route::get('/doctor/{doctor_id}', [ProfesionalesController::class, 'nombreDoctorById']);
 });

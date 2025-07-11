@@ -6,6 +6,8 @@ use Illuminate\Http\Request;
 use App\Models\Doctor;
 use App\Models\Especialidad;
 use App\Models\HorarioDisponible;
+use App\Models\MotivoDeAusencia;
+use App\Models\AusenciasDoctor;
 class ProfesionalesController extends Controller
 {
     public function index()
@@ -46,4 +48,21 @@ class ProfesionalesController extends Controller
         return response()->json(['horarios_laborales' =>$horarios]);
     }
 
+    public function getAusenciasByDoctor($doctorId)
+    {
+        $doctor = Doctor::find($doctorId);
+        if(!$doctor) {
+            return response()->json(['mensaje' => 'Doctor no encontrado'], 404);
+        }
+
+        $ausencias = $doctor->ausencias()->with('motivo')->orderByDesc('created_at')->get();
+
+        return response()->json(['ausencias' => $ausencias]);
+    }
+
+    public function getMotivosAusencia()
+    {
+        $motivos = MotivoDeAusencia::all();
+        return response()->json(['motivos' => $motivos]);
+    }
 }
