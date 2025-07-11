@@ -32,7 +32,7 @@ class EstadisticasController extends Controller
      * @param int $doctorId
      * @return JsonResponse
      */
-    public function estadisticasPorDoctor($doctorId): JsonResponse
+    public function estadisticasPorDoctor(Request $request, $doctorId): JsonResponse
     {
         try {
             // Verificar que el doctor existe
@@ -42,35 +42,78 @@ class EstadisticasController extends Controller
                     'error' => 'Doctor no encontrado'
                 ], 404);
             }
+            $desde = $request->input('desde');
+            $hasta = $request->input('hasta');
+            $turnosQuery = function($doctorId, $estado, $desde, $hasta) {
+                $query = Turno::where('doctor_id', $doctorId)->where('estado', $estado);
+                if ($desde) $query->where('fecha', '>=', $desde);
+                if ($hasta) $query->where('fecha', '<=', $hasta);
+                return $query->count();
+            };
 
+            $turnosReprogramadosQuery = function($doctorId, $desde, $hasta) {
+                $query = Turno::where('doctor_id', $doctorId)->where('reprogramado', true);
+                if ($desde) $query->where('fecha', '>=', $desde);
+                if ($hasta) $query->where('fecha', '<=', $hasta);
+                return $query->count();
+            };
             // Obtener estadísticas de turnos por estado
-            $estadisticasTurnos = Turno::select('estado', DB::raw('count(*) as cantidad'))
-                ->where('doctor_id', $doctorId)
-                ->groupBy('estado')
-                ->get()
-                ->keyBy('estado');
+            $turnosTotales = Turno::
+                    where('doctor_id', $doctor->doctor_id)->
+                    where(function($query) use ($desde, $hasta) {
+                        if ($desde) {
+                            $query->where('fecha', '>=', $desde);
+                        }
+                        if ($hasta) {
+                            $query->where('fecha', '<=', $hasta);
+                        }
+                    })->count();
+                $ausenciasFiltradas = $doctor->ausencias()
+                    ->when($desde, function($q) use ($desde) {
+                        $q->where('fecha_inicio', '>=', $desde);
+                    })
+                    ->when($hasta, function($q) use ($hasta) {
+                        $q->where('fecha_fin', '<=', $hasta);
+                    })
+                    ->get();
 
-            // Formatear las estadísticas según los estados solicitados
+                $diasAusencia = $ausenciasFiltradas->reduce(function($carry, $ausencia) {
+                    $inicio = Carbon::parse($ausencia->fecha_inicio);
+                    $fin = Carbon::parse($ausencia->fecha_fin);
+                    return $carry + $inicio->diffInDays($fin) + 1; // +1 para incluir ambos extremos
+                }, 0);
+                $ultimaAusencia = $doctor->ausencias()->orderByDesc('fecha_inicio')->first();
 
-
-            // Calcular ausencias (días sin trabajo)
-            $ausencias = $this->calcularAusencias($doctorId);
+                $estadisticasDoctor = [
+                    'doctor_id' => $doctor->doctor_id,
+                    'nombre' => $doctor->nombre_apellido ?? null,
+                    'especialidad' => $doctor->especialidad->nombre ?? null,
+                    'total_turnos' => $turnosTotales,
+                    'turnos_atendidos' => $turnosQuery($doctor->doctor_id, EstadoTurno::ATENDIDO, $desde, $hasta),
+                    'turnos_cancelados' => $turnosQuery($doctor->doctor_id, EstadoTurno::CANCELADO, $desde, $hasta),
+                    'turnos_rechazados' => $turnosQuery($doctor->doctor_id, EstadoTurno::RECHAZADO, $desde, $hasta),
+                    'turnos_aceptados' => $turnosQuery($doctor->doctor_id, EstadoTurno::ACEPTADO, $desde, $hasta),
+                    'turnos_desaprovechados' => $turnosQuery($doctor->doctor_id, EstadoTurno::DESAPROVECHADO, $desde, $hasta),
+                    'turnos_reprogramados' => $turnosReprogramadosQuery($doctor->doctor_id, $desde, $hasta),
+                    'ausencias_anotadas' => $doctor->ausencias()->count(),
+                    'ultima_ausencia' => $ultimaAusencia
+                    ? [
+                        'fecha_inicio' => $ultimaAusencia->fecha_inicio,
+                        'fecha_fin' => $ultimaAusencia->fecha_fin
+                    ] : null,
+                    'dias_ausencia' => $diasAusencia,
+                    'desde' => $desde,
+                    'hasta' => $hasta
+                    ];
 
             return response()->json([
-                'doctor_id' => $doctorId,
-                'doctor' => [
-                    'id' => $doctor->doctor_id,
-                    'nombre' => $doctor->nombre_apellido ?? null,
-                    'especialidad' => $doctor->especialidad->nombre ?? null
-                ],
-                'estadisticas' => $estadisticas,
-                'ausencias' => $ausencias
+                'estadisticas_doctor' => $estadisticasDoctor,
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Error al obtener estadísticas del doctor',
-                'mensaje' => $e->getMessage()
+                'mensaje' => 'Error al obtener estadísticas del doctor',
+                'detalle' => $e->getMessage()
             ], 500);
         }
     }
@@ -138,7 +181,7 @@ class EstadisticasController extends Controller
             $totalDoctores = Doctor::count();
             $totalUsers = User::count();
             return response()->json([
-                'totalTurnos' => $turnosTotales,
+                'totalTurnos' => $turnosTotales ,
                 'turnosAtendidos' => $turnosAtendidos,
                 'turnosCancelados' => $turnosCancelados,
                 'turnosRechazados' => $turnosRechazados,
@@ -159,122 +202,92 @@ class EstadisticasController extends Controller
             ], 500);
         }
     }
-
-    /**
-     * Contar turnos reprogramados para un doctor específico
-     *
-     * @param int $doctorId
-     * @return int
-     */
-    private function contarTurnosReprogramados($doctorId): int
-    {
-        return Turno::where('doctor_id', $doctorId)
-            ->where('reprogramado', true)
-            ->count();
-    }
-
-    /**
-     * Calcular ausencias para un doctor específico
-     * Cuenta los días en los que el doctor tenía horarios disponibles pero no tuvo turnos
-     *
-     * @param int $doctorId
-     * @return int
-     */
-    private function calcularAusencias($doctorId): int
-    {
-        try {
-            // Obtener fechas únicas de horarios disponibles del doctor
-            $fechasConHorarios = HorarioDisponible::where('doctor_id', $doctorId)
-                ->whereNotNull('fecha')
-                ->select('fecha')
-                ->distinct()
-                ->pluck('fecha')
-                ->toArray();
-
-            // Obtener fechas únicas donde el doctor tuvo turnos
-            $fechasConTurnos = Turno::where('doctor_id', $doctorId)
-                ->whereNotNull('fecha')
-                ->select('fecha')
-                ->distinct()
-                ->pluck('fecha')
-                ->toArray();
-
-            // Contar días con horarios disponibles pero sin turnos
-            $ausencias = 0;
-            foreach ($fechasConHorarios as $fecha) {
-                if (!in_array($fecha, $fechasConTurnos)) {
-                    $ausencias++;
-                }
-            }
-
-            return $ausencias;
-        } catch (\Exception $e) {
-            // En caso de error, retornar 0
-            return 0;
-        }
-    }
-
-    /**
-     * Calcular ausencias globales de todos los doctores
-     *
-     * @return int
-     */
-    private function calcularAusenciasGlobales(): int
-    {
-        $doctores = Doctor::all();
-        $ausenciasGlobales = 0;
-
-        foreach ($doctores as $doctor) {
-            $ausenciasGlobales += $this->calcularAusencias($doctor->doctor_id);
-        }
-
-        return $ausenciasGlobales;
-    }
-
     /**
      * Obtener estadísticas detalladas por doctor (listado completo)
      *
      * @return JsonResponse
      */
-    public function estadisticasPorTodosLosDoctores(): JsonResponse
+    public function estadisticasPorTodosLosDoctores(Request $request): JsonResponse
     {
         try {
+            $desde = $request->input('desde');
+            $hasta = $request->input('hasta');
             $doctores = Doctor::with('especialidad')->get();
             $estadisticasPorDoctor = [];
 
+            $turnosQuery = function($doctorId, $estado, $desde, $hasta) {
+                $query = Turno::where('doctor_id', $doctorId)->where('estado', $estado);
+                if ($desde) $query->where('fecha', '>=', $desde);
+                if ($hasta) $query->where('fecha', '<=', $hasta);
+                return $query->count();
+            };
+            $turnosReprogramadosQuery = function($doctorId, $desde, $hasta) {
+                $query = Turno::where('doctor_id', $doctorId)->where('reprogramado', true);
+                if ($desde) $query->where('fecha', '>=', $desde);
+                if ($hasta) $query->where('fecha', '<=', $hasta);
+                return $query->count();
+            };
+
             foreach ($doctores as $doctor) {
-                // Obtener estadísticas de turnos por estado para este doctor
-                $estadisticasTurnos = Turno::select('estado', DB::raw('count(*) as cantidad'))
-                    ->where('doctor_id', $doctor->doctor_id)
-                    ->groupBy('estado')
-                    ->get()
-                    ->keyBy('estado');
+                $turnosTotales = Turno::
+                    where('doctor_id', $doctor->doctor_id)->
+                    where(function($query) use ($desde, $hasta) {
+                        if ($desde) {
+                            $query->where('fecha', '>=', $desde);
+                        }
+                        if ($hasta) {
+                            $query->where('fecha', '<=', $hasta);
+                        }
+                    })->count();
+                $ausenciasFiltradas = $doctor->ausencias()
+                    ->when($desde, function($q) use ($desde) {
+                        $q->where('fecha_inicio', '>=', $desde);
+                    })
+                    ->when($hasta, function($q) use ($hasta) {
+                        $q->where('fecha_fin', '<=', $hasta);
+                    })
+                    ->get();
 
-                // Formatear las estadísticas
+                $diasAusencia = $ausenciasFiltradas->reduce(function($carry, $ausencia) {
+                    $inicio = Carbon::parse($ausencia->fecha_inicio);
+                    $fin = Carbon::parse($ausencia->fecha_fin);
+                    return $carry + $inicio->diffInDays($fin) + 1; // +1 para incluir ambos extremos
+                }, 0);
+                $ultimaAusencia = $doctor->ausencias()->orderByDesc('fecha_inicio')->first();
 
-                // Calcular ausencias
-                $ausencias = $this->calcularAusencias($doctor->doctor_id);
-
-                $estadisticasPorDoctor[] = [
+                $estadisticasDoctor = [
                     'doctor_id' => $doctor->doctor_id,
-                    'doctor' => [
-                        'id' => $doctor->doctor_id,
-                        'nombre' => $doctor->nombre_apellido ?? null,
-                        'especialidad' => $doctor->especialidad->nombre ?? null
-                    ],
-                    'estadisticas' => $estadisticas,
-                    'ausencias' => $ausencias
+                    'nombre' => $doctor->nombre_apellido ?? null,
+                    'especialidad' => $doctor->especialidad->nombre ?? null,
+                    'total_turnos' => $turnosTotales,
+                    'turnos_atendidos' => $turnosQuery($doctor->doctor_id, EstadoTurno::ATENDIDO, $desde, $hasta),
+                    'turnos_cancelados' => $turnosQuery($doctor->doctor_id, EstadoTurno::CANCELADO, $desde, $hasta),
+                    'turnos_rechazados' => $turnosQuery($doctor->doctor_id, EstadoTurno::RECHAZADO, $desde, $hasta),
+                    'turnos_aceptados' => $turnosQuery($doctor->doctor_id, EstadoTurno::ACEPTADO, $desde, $hasta),
+                    'turnos_desaprovechados' => $turnosQuery($doctor->doctor_id, EstadoTurno::DESAPROVECHADO, $desde, $hasta),
+                    'turnos_reprogramados' => $turnosReprogramadosQuery($doctor->doctor_id, $desde, $hasta),
+                    'ausencias_anotadas' => $doctor->ausencias()->count(),
+                    'ultima_ausencia' => $ultimaAusencia
+                    ? [
+                        'fecha_inicio' => $ultimaAusencia->fecha_inicio,
+                        'fecha_fin' => $ultimaAusencia->fecha_fin
+                    ] : null,
+                    'dias_ausencia' => $diasAusencia,
+                    'desde' => $desde,
+                    'hasta' => $hasta
                 ];
+                $estadisticasPorDoctor[] = $estadisticasDoctor;
             }
-
             return response()->json([
-                'doctores' => $estadisticasPorDoctor
+                'estadisticas_doctores' => $estadisticasPorDoctor,
+                'desde' => $desde,
+                'hasta' => $hasta
             ]);
 
         } catch (\Exception $e) {
             return response()->json([
-                'error' => 'Error al obtener estadísticas por doctor',
-                'mensaje' => $e->getMessage()
+                'mensaje' => 'Error al obtener estadísticas por doctor',
+                'detalle' => $e->getMessage()
             ], 500);
         }
     }
