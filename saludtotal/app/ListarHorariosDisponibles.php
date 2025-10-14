@@ -6,7 +6,8 @@ class ListarHorariosDisponibles
 {
     public static  function listarHorariosDisponibles($hora_inicio,$hora_fin, $fecha, $doctor_id, $duracion_slot): array
     {
-        $horario = $hora_inicio;
+        // $horario = Carbon::Parse($hora_inicio,);
+        $horario = \Carbon\Carbon::createFromFormat('H:i', $hora_inicio);
         $slots = [];
         while ($horario->lessThan($hora_fin)) {
             $slots[] = $horario->copy()->format('H:i');

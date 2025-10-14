@@ -18,11 +18,6 @@ class TurnoHelper
         return Turno::where('doctor_id', $doctorId)
             ->where('fecha', $fecha)
             ->where('hora', $hora)
-            ->where(function ($query) {
-                $query->where('estado', EstadoTurno::PENDIENTE)
-                    ->orWhere('estado', EstadoTurno::ACTIVO)
-                    ->orWhere('estado', EstadoTurno::ACEPTADO);
-            })
             ->exists();
     }
 

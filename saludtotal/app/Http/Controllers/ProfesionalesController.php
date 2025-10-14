@@ -32,7 +32,7 @@ class ProfesionalesController extends Controller
 
     public function doctores()
     {
-        $doctor = Doctor::all();
+        $doctor = Doctor::with('especialidad')->get();
         return response()->json(['doctores' => $doctor]);
     }
 
