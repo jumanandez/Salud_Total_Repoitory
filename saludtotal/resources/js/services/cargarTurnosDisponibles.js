@@ -15,8 +15,8 @@ export default async function cargarTurnosDisponibles(doctorId, fecha) {
 
     if (!response.ok) {
         const errorData = await response.json();
-        const mensaje = errorData?.errors?.fecha?.[0] || 'Error desconocido';
-        console.log(mensaje);
+        const mensaje = errorData || 'Error desconocido';
+        console.log(errorData);
 
         return {error: mensaje};
     }
