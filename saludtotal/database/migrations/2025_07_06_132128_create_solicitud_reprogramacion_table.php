@@ -11,15 +11,15 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('solicitud_reprogramacion', function (Blueprint $table) {
-            $table->bigInteger('id')->autoIncrement();
-            $table->bigInteger('turno_id');
-            $table->foreign('turno_id')->references('turno_id')->on('turnos')->onDelete('cascade');
-            $table->date('fecha');
-            $table->string('hora');
-            $table->enum('estado', ['aceptado', 'pendiente', 'rechazado']);
-            $table->timestamps();
-        });
+        // Schema::create('solicitud_reprogramacion', function (Blueprint $table) {
+        //     $table->bigInteger('id')->autoIncrement();
+        //     $table->bigInteger('turno_id');
+        //     $table->foreign('turno_id')->references('turno_id')->on('turnos')->onDelete('cascade');
+        //     $table->date('fecha');
+        //     $table->string('hora');
+        //     $table->enum('estado', ['aceptado', 'pendiente', 'rechazado']);
+        //     $table->timestamps();
+        // });
     }
 
     /**

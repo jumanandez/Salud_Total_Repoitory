@@ -3,9 +3,14 @@
 namespace Database\Seeders;
 
 use App\Models\User;
+use App\Models\Doctor;
+use App\Models\Especialidad;
+use App\Models\AusenciasDoctor;
 // use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Database\Seeders\AusenciasSeeder;
+use Database\Seeders\DisponibilidadesDoctorSeeder;
+use Illuminate\Support\Facades\DB;
 class DatabaseSeeder extends Seeder
 {
     /**
@@ -13,12 +18,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory(10)->create();
         $this->call([
-            // Otros seeders
-            // Ejemplo: EspecialidadesSeeder::class,
-            // Ejemplo: DoctoresSeeder::class,
-            AusenciasSeeder::class, // Asegúrate de que este Seeder esté definido
+            DisponibilidadesDoctorSeeder::class
         ]);
     }
 }

@@ -24,10 +24,17 @@ class TurnosSeeder extends Seeder
             EstadoTurno::RECHAZADO,
             EstadoTurno::DESAPROVECHADO
         ];
-        $meses = [2,3,4,5,6,7,8]; // Abril, Junio, Julio, Agosto
+        $meses = [2,3,4,5,6,7,8]; // Febrero a Agosto
         $anios = [2025];
-        $pacientes = User::pluck('paciente_id')->toArray();
-        $doctores = Doctor::pluck('doctor_id')->toArray();
+        // Obtener todos los usuarios como pacientes
+        $pacientes = \DB::table('usuarios')->pluck('usuario_id')->toArray();
+        // Obtener usuarios que son doctores (tienen rol de doctor)
+        $doctores = \DB::table('usuarios')
+            ->join('usuario_rol', 'usuarios.usuario_id', '=', 'usuario_rol.id_usuario')
+            ->join('roles', 'usuario_rol.id_rol', '=', 'roles.id_rol')
+            ->where('roles.name', 'doctor')
+            ->pluck('usuarios.usuario_id')
+            ->toArray();
         $faker = \Faker\Factory::create('es_ES');
         $turnosPorMes = 25;
         foreach ($anios as $anio) {
