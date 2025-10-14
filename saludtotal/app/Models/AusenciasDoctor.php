@@ -9,6 +9,7 @@ use App\Models\MotivoDeAusencia;
 class AusenciasDoctor extends Model
 {
     protected $table = 'ausencias_doctores';
+    protected $primaryKey = 'ausencia_id';
     protected $fillable = ['doctor_id', 'fecha_inicio', 'fecha_fin', 'motivo_id'];
 
     // Relación con el modelo Doctor
